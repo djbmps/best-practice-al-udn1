@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ผู้ดูแลระบบ | Best Practice Active Learning สพป.อุดรธานี เขต 1</title>
+<title>ผู้ดูแลระบบ | Best Practice 2569 สพป.อุดรธานี เขต 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--brand:#1e4d8c;--brand-dk:#143766;--brand-lt:#e8f0fa;--accent:#f5a623;
@@ -43,7 +43,7 @@ input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0
 .stat .v{font-size:27px;font-weight:700;color:var(--brand-dk);line-height:1.25}
 
 /* filters */
-.filters{display:grid;grid-template-columns:2fr 1.4fr 1.4fr 1fr auto;gap:10px;align-items:end}
+.filters{display:grid;grid-template-columns:1.8fr 1.5fr 1.3fr 1.3fr .9fr auto;gap:10px;align-items:end}
 @media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
 .fl label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
 
@@ -83,7 +83,7 @@ td.wrap{white-space:normal;min-width:230px;max-width:340px}
   <div class="wrap">
     <div class="crest">สพป.<br>อด.1</div>
     <div>
-      <h1>ระบบผู้ดูแล — Best Practice Active Learning</h1>
+      <h1>ระบบผู้ดูแล — Best Practice ประจำปีงบประมาณ 2569</h1>
       <p>สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
     </div>
   </div>
@@ -112,6 +112,7 @@ td.wrap{white-space:normal;min-width:230px;max-width:340px}
       <div class="filters">
         <div class="fl"><label>ค้นหา (ชื่อ / โรงเรียน / ชื่อผลงาน / รหัสอ้างอิง)</label>
           <input type="text" id="q" placeholder="พิมพ์คำค้น..."></div>
+        <div class="fl"><label>ประเภทผลงาน</label><select id="fType"><option value="">ทั้งหมด</option></select></div>
         <div class="fl"><label>กลุ่มสาระการเรียนรู้</label><select id="fSub"><option value="">ทั้งหมด</option></select></div>
         <div class="fl"><label>กลุ่มโรงเรียน</label><select id="fGrp"><option value="">ทั้งหมด</option></select></div>
         <div class="fl"><label>ระดับชั้น</label><select id="fLv"><option value="">ทั้งหมด</option></select></div>
@@ -151,6 +152,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtn
 const COLS = [
   {k:'timestamp', t:'วันที่ส่ง',        w:''},
   {k:'refCode',   t:'รหัสอ้างอิง',      w:''},
+  {k:'ptype',     t:'ประเภทผลงาน',      w:'wrap'},
   {k:'subject',   t:'กลุ่มสาระ',        w:''},
   {k:'title',     t:'ชื่อผลงาน',        w:'wrap'},
   {k:'name',      t:'ชื่อ - สกุล',      w:''},
@@ -161,8 +163,9 @@ const COLS = [
   {k:'level',     t:'ระดับชั้น',        w:''},
   {k:'phone',     t:'โทรศัพท์',         w:''},
   {k:'lineId',    t:'ID Line',          w:''},
-  {k:'fileUrl',   t:'แผนการสอน',        w:''},
-  {k:'videoUrl',  t:'คลิปวิดีโอ',       w:''},
+  {k:'planUrl',   t:'แผนการสอน',        w:''},
+  {k:'infoUrl',   t:'อินโฟกราฟิก',      w:''},
+  {k:'videoUrl',  t:'คลิปการสอน',       w:''},
   {k:'note',      t:'หมายเหตุ',         w:'wrap'}
 ];
 
@@ -211,6 +214,7 @@ function call(params){
 /* ---------- render ---------- */
 function render(rows){
   ROWS=rows;
+  fill('fType',uniq(rows,'ptype'));
   fill('fSub', uniq(rows,'subject'));
   fill('fGrp', uniq(rows,'schoolGroup'));
   fill('fLv',  uniq(rows,'level'));
@@ -235,11 +239,12 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;',
 
 function filtered(){
   const q=document.getElementById('q').value.trim().toLowerCase();
-  const fs=document.getElementById('fSub').value, fg=document.getElementById('fGrp').value,
+  const ft=document.getElementById('fType').value,
+        fs=document.getElementById('fSub').value, fg=document.getElementById('fGrp').value,
         fl=document.getElementById('fLv').value;
   let r=ROWS.filter(x=>
-    (!fs||x.subject===fs) && (!fg||x.schoolGroup===fg) && (!fl||x.level===fl) &&
-    (!q || [x.name,x.school,x.title,x.refCode,x.schoolGroup,x.subject,x.lineId,x.phone]
+    (!ft||x.ptype===ft) && (!fs||x.subject===fs) && (!fg||x.schoolGroup===fg) && (!fl||x.level===fl) &&
+    (!q || [x.name,x.school,x.title,x.refCode,x.schoolGroup,x.subject,x.ptype,x.lineId,x.phone]
             .join(' ').toLowerCase().includes(q)));
   r.sort((a,b)=>String(a[sortK]||'').localeCompare(String(b[sortK]||''),'th',{numeric:true})*sortD);
   return r;
@@ -250,7 +255,9 @@ function draw(){
   document.getElementById('empty').style.display = rows.length?'none':'block';
   tb.innerHTML = rows.map(r=>'<tr>'+COLS.map(c=>{
     let v=r[c.k]||'';
-    if(c.k==='fileUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">📕 เปิดไฟล์</a>':'—';
+    if(c.k==='planUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">📕 แผนการสอน</a>':'—';
+    else if(c.k==='infoUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">🖼️ อินโฟกราฟิก</a>':'—';
+    else if(c.k==='ptype') v='<span class="pill'+(String(v).indexOf('Active Learning')>-1?'':' suf')+'">'+esc(v)+'</span>';
     else if(c.k==='videoUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">▶ ดูคลิป</a>':'—';
     else if(c.k==='subject') v='<span class="pill'+(String(v).indexOf('เศรษฐกิจพอเพียง')>-1?' suf':'')+'">'+esc(v)+'</span>';
     else if(c.k==='refCode') v='<span class="mono">'+esc(v)+'</span>';
@@ -266,13 +273,14 @@ function stats(rows){
     ['ตรงเงื่อนไขที่กรอง', rows.length],
     ['โรงเรียนที่ส่ง', g('school')],
     ['กลุ่มโรงเรียนที่ส่ง', g('schoolGroup')],
+    ['ประเภทผลงาน', g('ptype')],
     ['กลุ่มสาระที่มีผลงาน', g('subject')]
   ];
   document.getElementById('stats').innerHTML = items.map(([k,v])=>
     '<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join('');
 }
 
-['q','fSub','fGrp','fLv'].forEach(id=>document.getElementById(id)
+['q','fType','fSub','fGrp','fLv'].forEach(id=>document.getElementById(id)
   .addEventListener('input',draw));
 
 document.getElementById('reload').addEventListener('click',async()=>{
@@ -294,7 +302,7 @@ document.getElementById('csv').addEventListener('click',()=>{
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='best-practice-AL-udn1.csv';
+  a.download='best-practice-2569-udn1.csv';
   a.click(); URL.revokeObjectURL(a.href);
 });
 
