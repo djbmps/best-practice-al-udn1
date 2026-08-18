@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ผู้ดูแลระบบ | Best Practice Active Learning สพป.อุดรธานี เขต 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#1e4d8c;--brand-dk:#143766;--brand-lt:#e8f0fa;--accent:#f5a623;
+  --ok:#1f8a5f;--err:#c0392b;--ink:#1c2733;--muted:#6b7a8c;--line:#dde5ee;--bg:#f4f7fb;
+  --shadow:0 2px 10px rgba(20,55,102,.07)}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Sarabun',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15.5px}
+.topbar{background:linear-gradient(135deg,var(--brand-dk),var(--brand) 55%,#2a6bb5);color:#fff;padding:20px}
+.topbar .wrap{max-width:1340px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.crest{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.5);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;text-align:center;line-height:1.15;flex:none}
+.topbar h1{margin:0;font-size:19px}
+.topbar p{margin:2px 0 0;font-size:14px;opacity:.9}
+.page{max-width:1340px;margin:18px auto 50px;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:16px}
+.card .body{padding:16px}
+
+/* gate */
+.gate{max-width:420px;margin:70px auto;text-align:center}
+.gate .body{padding:30px 26px}
+.gate h2{margin:0 0 6px;font-size:20px;color:var(--brand-dk)}
+.gate p{margin:0 0 18px;color:var(--muted);font-size:14.5px}
+
+input,select,button{font-family:inherit;font-size:15px}
+input[type=text],input[type=password],select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;width:100%;background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(30,77,140,.13)}
+.btn{padding:10px 20px;border-radius:9px;border:none;cursor:pointer;font-weight:600;transition:.15s}
+.btn-main{background:var(--brand);color:#fff}.btn-main:hover{background:var(--brand-dk)}
+.btn-sm{padding:7px 14px;font-size:14px}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{background:#f4f7fb}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 17px;box-shadow:var(--shadow)}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-size:27px;font-weight:700;color:var(--brand-dk);line-height:1.25}
+
+/* filters */
+.filters{display:grid;grid-template-columns:2fr 1.4fr 1.4fr 1fr auto;gap:10px;align-items:end}
+@media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+.fl label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+
+/* table */
+.tablewrap{overflow:auto;max-height:66vh;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14.2px;white-space:nowrap}
+th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--brand-lt);color:var(--brand-dk);font-weight:600;position:sticky;top:0;z-index:2;
+  cursor:pointer;user-select:none;font-size:13.5px}
+th:hover{background:#dae7f7}
+th .ar{opacity:.4;font-size:11px}
+tbody tr:nth-child(even){background:#fbfcfe}
+tbody tr:hover{background:#f2f7fd}
+td.wrap{white-space:normal;min-width:230px;max-width:340px}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:600;
+  background:var(--brand-lt);color:var(--brand-dk);white-space:nowrap}
+.pill.suf{background:#fff3dd;color:#8a5a00}
+.lnk{color:var(--brand);text-decoration:none;font-weight:500}
+.lnk:hover{text-decoration:underline}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--muted)}
+.empty{padding:50px;text-align:center;color:var(--muted)}
+.alert{margin:0 0 14px;padding:12px 16px;border-radius:10px;background:#fdecea;border:1px solid #f3b7b1;
+  color:#8e2b21;display:none}
+.alert.on{display:block}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 16px;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar h2{margin:0;font-size:16px;color:var(--brand-dk)}
+.spin{width:15px;height:15px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
+  display:inline-block;vertical-align:-2px;margin-right:7px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#app{display:none}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="crest">สพป.<br>อด.1</div>
+    <div>
+      <h1>ระบบผู้ดูแล — Best Practice Active Learning</h1>
+      <p>สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
+    </div>
+  </div>
+</header>
+
+<!-- ---------- login gate ---------- -->
+<div class="page" id="gate">
+  <div class="card gate">
+    <div class="body">
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p>กรุณากรอกรหัสผ่านผู้ดูแลระบบ</p>
+      <div class="alert" id="gErr"></div>
+      <input type="password" id="pw" placeholder="รหัสผ่านผู้ดูแล" autocomplete="current-password">
+      <button class="btn btn-main" id="login" style="width:100%;margin-top:12px">เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- app ---------- -->
+<div class="page" id="app">
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <div class="body">
+      <div class="filters">
+        <div class="fl"><label>ค้นหา (ชื่อ / โรงเรียน / ชื่อผลงาน / รหัสอ้างอิง)</label>
+          <input type="text" id="q" placeholder="พิมพ์คำค้น..."></div>
+        <div class="fl"><label>กลุ่มสาระการเรียนรู้</label><select id="fSub"><option value="">ทั้งหมด</option></select></div>
+        <div class="fl"><label>กลุ่มโรงเรียน</label><select id="fGrp"><option value="">ทั้งหมด</option></select></div>
+        <div class="fl"><label>ระดับชั้น</label><select id="fLv"><option value="">ทั้งหมด</option></select></div>
+        <div class="fl" style="display:flex;gap:8px">
+          <button class="btn btn-main btn-sm" id="reload">รีเฟรช</button>
+          <button class="btn btn-ghost btn-sm" id="csv">ส่งออก CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert" id="aErr"></div>
+
+  <div class="card">
+    <div class="bar">
+      <h2>รายการผลงานที่ส่งเข้ามา</h2>
+      <span class="mono" id="count">—</span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">ยังไม่มีข้อมูลที่ตรงกับเงื่อนไข</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ตั้งค่า: วาง URL ของ Google Apps Script Web App (ลงท้ายด้วย /exec)
+   ให้เหมือนกับไฟล์ index.html
+   ============================================================ */
+const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
+/* ============================================================ */
+
+const COLS = [
+  {k:'timestamp', t:'วันที่ส่ง',        w:''},
+  {k:'refCode',   t:'รหัสอ้างอิง',      w:''},
+  {k:'subject',   t:'กลุ่มสาระ',        w:''},
+  {k:'title',     t:'ชื่อผลงาน',        w:'wrap'},
+  {k:'name',      t:'ชื่อ - สกุล',      w:''},
+  {k:'position',  t:'ตำแหน่ง',          w:''},
+  {k:'academic',  t:'วิทยฐานะ',         w:''},
+  {k:'schoolGroup',t:'กลุ่มโรงเรียน',   w:'wrap'},
+  {k:'school',    t:'โรงเรียน',         w:'wrap'},
+  {k:'level',     t:'ระดับชั้น',        w:''},
+  {k:'phone',     t:'โทรศัพท์',         w:''},
+  {k:'lineId',    t:'ID Line',          w:''},
+  {k:'fileUrl',   t:'แผนการสอน',        w:''},
+  {k:'videoUrl',  t:'คลิปวิดีโอ',       w:''},
+  {k:'note',      t:'หมายเหตุ',         w:'wrap'}
+];
+
+let ROWS=[], TOKEN='', sortK='timestamp', sortD=-1;
+
+/* ---------- login ---------- */
+const gate=document.getElementById('gate'), app=document.getElementById('app');
+document.getElementById('login').addEventListener('click',doLogin);
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+async function doLogin(){
+  const pw=document.getElementById('pw').value.trim();
+  const gErr=document.getElementById('gErr');
+  gErr.classList.remove('on');
+  if(!pw){ gErr.textContent='กรุณากรอกรหัสผ่าน'; gErr.classList.add('on'); return; }
+  if(!API_URL){ gErr.textContent='ยังไม่ได้ตั้งค่า API_URL ในไฟล์ admin.html'; gErr.classList.add('on'); return; }
+  const b=document.getElementById('login'); b.disabled=true; b.innerHTML='<i class="spin"></i>กำลังตรวจสอบ...';
+  try{
+    const out = await call({action:'list', token:pw});
+    if(out.ok){
+      TOKEN=pw; sessionStorage.setItem('bpal_t',pw);
+      gate.style.display='none'; app.style.display='block';
+      render(out.rows||[]);
+    }else{
+      gErr.textContent = out.message||'รหัสผ่านไม่ถูกต้อง'; gErr.classList.add('on');
+    }
+  }catch(e){ gErr.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; gErr.classList.add('on'); }
+  b.disabled=false; b.textContent='เข้าสู่ระบบ';
+}
+
+/* JSONP — เลี่ยงปัญหา CORS ของ Apps Script */
+function call(params){
+  return new Promise((ok,no)=>{
+    const cb='__cb'+Math.floor(performance.now()*1000)+'_'+(call._i=(call._i||0)+1);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();no(new Error('หมดเวลาเชื่อมต่อ'))},30000);
+    function cleanup(){clearTimeout(t);delete window[cb];s.remove()}
+    window[cb]=d=>{cleanup();ok(d)};
+    s.onerror=()=>{cleanup();no(new Error('ไม่สามารถเรียก API ได้'))};
+    const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    s.src=API_URL+'?'+q+'&callback='+cb;
+    document.body.appendChild(s);
+  });
+}
+
+/* ---------- render ---------- */
+function render(rows){
+  ROWS=rows;
+  fill('fSub', uniq(rows,'subject'));
+  fill('fGrp', uniq(rows,'schoolGroup'));
+  fill('fLv',  uniq(rows,'level'));
+  head(); draw();
+}
+function uniq(rows,k){ return [...new Set(rows.map(r=>r[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th')); }
+function fill(id,vals){
+  const s=document.getElementById(id), cur=s.value;
+  s.innerHTML='<option value="">ทั้งหมด</option>';
+  vals.forEach(v=>s.appendChild(new Option(v,v)));
+  if(vals.includes(cur)) s.value=cur;
+}
+function head(){
+  document.getElementById('thead').innerHTML = COLS.map(c=>
+    '<th data-k="'+c.k+'">'+c.t+' <span class="ar">'+(sortK===c.k?(sortD>0?'▲':'▼'):'↕')+'</span></th>').join('');
+  document.querySelectorAll('#thead th').forEach(th=>th.addEventListener('click',()=>{
+    const k=th.dataset.k; if(sortK===k) sortD=-sortD; else {sortK=k;sortD=1;}
+    head(); draw();
+  }));
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function filtered(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const fs=document.getElementById('fSub').value, fg=document.getElementById('fGrp').value,
+        fl=document.getElementById('fLv').value;
+  let r=ROWS.filter(x=>
+    (!fs||x.subject===fs) && (!fg||x.schoolGroup===fg) && (!fl||x.level===fl) &&
+    (!q || [x.name,x.school,x.title,x.refCode,x.schoolGroup,x.subject,x.lineId,x.phone]
+            .join(' ').toLowerCase().includes(q)));
+  r.sort((a,b)=>String(a[sortK]||'').localeCompare(String(b[sortK]||''),'th',{numeric:true})*sortD);
+  return r;
+}
+function draw(){
+  const rows=filtered(), tb=document.getElementById('tbody');
+  document.getElementById('count').textContent='แสดง '+rows.length+' จากทั้งหมด '+ROWS.length+' รายการ';
+  document.getElementById('empty').style.display = rows.length?'none':'block';
+  tb.innerHTML = rows.map(r=>'<tr>'+COLS.map(c=>{
+    let v=r[c.k]||'';
+    if(c.k==='fileUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">📕 เปิดไฟล์</a>':'—';
+    else if(c.k==='videoUrl') v = v?'<a class="lnk" href="'+esc(v)+'" target="_blank" rel="noopener">▶ ดูคลิป</a>':'—';
+    else if(c.k==='subject') v='<span class="pill'+(String(v).indexOf('เศรษฐกิจพอเพียง')>-1?' suf':'')+'">'+esc(v)+'</span>';
+    else if(c.k==='refCode') v='<span class="mono">'+esc(v)+'</span>';
+    else v=esc(v);
+    return '<td'+(c.w?' class="'+c.w+'"':'')+'>'+v+'</td>';
+  }).join('')+'</tr>').join('');
+  stats(rows);
+}
+function stats(rows){
+  const g=k=>new Set(rows.map(r=>r[k]).filter(Boolean)).size;
+  const items=[
+    ['ผลงานทั้งหมด', ROWS.length],
+    ['ตรงเงื่อนไขที่กรอง', rows.length],
+    ['โรงเรียนที่ส่ง', g('school')],
+    ['กลุ่มโรงเรียนที่ส่ง', g('schoolGroup')],
+    ['กลุ่มสาระที่มีผลงาน', g('subject')]
+  ];
+  document.getElementById('stats').innerHTML = items.map(([k,v])=>
+    '<div class="stat"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join('');
+}
+
+['q','fSub','fGrp','fLv'].forEach(id=>document.getElementById(id)
+  .addEventListener('input',draw));
+
+document.getElementById('reload').addEventListener('click',async()=>{
+  const b=document.getElementById('reload'); b.disabled=true; b.innerHTML='<i class="spin"></i>โหลด...';
+  const aErr=document.getElementById('aErr'); aErr.classList.remove('on');
+  try{
+    const out=await call({action:'list',token:TOKEN});
+    if(out.ok) render(out.rows||[]);
+    else { aErr.textContent=out.message||'โหลดข้อมูลไม่สำเร็จ'; aErr.classList.add('on'); }
+  }catch(e){ aErr.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; aErr.classList.add('on'); }
+  b.disabled=false; b.textContent='รีเฟรช';
+});
+
+document.getElementById('csv').addEventListener('click',()=>{
+  const rows=filtered();
+  const esq=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  const csv=[COLS.map(c=>esq(c.t)).join(',')]
+    .concat(rows.map(r=>COLS.map(c=>esq(r[c.k])).join(','))).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='best-practice-AL-udn1.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* auto-login จาก session เดิม */
+(function(){
+  const t=sessionStorage.getItem('bpal_t');
+  if(t && API_URL){ document.getElementById('pw').value=t; doLogin(); }
+})();
+</script>
+</body>
+</html>
