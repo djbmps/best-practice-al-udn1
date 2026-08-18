@@ -1,11 +1,11 @@
 /*******************************************************************
- *  ระบบส่งผลงาน Best Practice การจัดการเรียนรู้เชิงรุก (Active Learning)
+ *  ระบบส่งผลงานแนวปฏิบัติที่เป็นเลิศ (Best Practice) ประจำปีงบประมาณ 2569
  *  สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1
  *  -----------------------------------------------------------------
- *  ไฟล์นี้เป็นส่วน "หลังบ้าน" สำหรับ Google Apps Script
- *  ทำหน้าที่  : รับข้อมูลจากฟอร์ม -> บันทึกลง Google Sheet
- *               -> อัปโหลดไฟล์ PDF ลง Google Drive
- *               -> ส่งข้อมูลให้หน้าผู้ดูแลระบบ (admin.html)
+ *  รองรับผลงาน 3 ประเภท
+ *    1) การจัดการเรียนรู้เชิงรุก (Active Learning)  -> แผนการสอน + คลิป + อินโฟกราฟิก
+ *    2) ด้านการบริหารสถานศึกษา                      -> อินโฟกราฟิก
+ *    3) ด้านการจัดการเรียนรู้                        -> อินโฟกราฟิก
  *******************************************************************/
 
 /* =================== ⚙️ ตั้งค่า 3 บรรทัดนี้ =================== */
@@ -13,11 +13,10 @@
 // 1) รหัส Google Sheet  (คัดลอกจาก URL ของชีต ช่วง /d/........./edit)
 const SHEET_ID   = '1LsGET6p0PaxTvokyI7N4EpsB9_PYFFEV8iwW9EPUt1c';
 
-// 2) รหัสโฟลเดอร์ใน Google Drive สำหรับเก็บไฟล์แผนการสอน
-//    (คัดลอกจาก URL ของโฟลเดอร์ ช่วง /folders/.........)
+// 2) รหัสโฟลเดอร์ใน Google Drive สำหรับเก็บไฟล์ผลงาน
 const FOLDER_ID  = '1kIIgjAEI8gVfxyDzBEEA_iU62B5Fnh8z';
 
-// 3) รหัสผ่านสำหรับเข้าหน้าผู้ดูแลระบบ (admin.html) — ควรเปลี่ยนเป็นรหัสของท่านเอง
+// 3) รหัสผ่านสำหรับเข้าหน้าผู้ดูแลระบบ (admin.html)
 const ADMIN_PASS = 'udn1@bestal2569';
 
 /* ============================================================== */
@@ -26,13 +25,19 @@ const SHEET_NAME = 'ผลงาน';
 const MAX_BYTES  = 10 * 1024 * 1024;   // 10 MB
 
 const HEADERS = [
-  'ลำดับ', 'วันที่ส่ง', 'รหัสอ้างอิง', 'กลุ่มสาระการเรียนรู้', 'ชื่อผลงาน',
+  'ลำดับ', 'วันที่ส่ง', 'รหัสอ้างอิง', 'ประเภทผลงาน', 'กลุ่มสาระการเรียนรู้', 'ชื่อผลงาน',
   'คำนำหน้า', 'ชื่อ - สกุล', 'ตำแหน่ง', 'วิทยฐานะ',
   'กลุ่มโรงเรียน', 'โรงเรียน', 'ระดับชั้น',
   'เบอร์โทรศัพท์', 'ID Line',
-  'ลิงก์แผนการจัดการเรียนรู้', 'ชื่อไฟล์', 'ขนาดไฟล์ (KB)',
-  'ลิงก์คลิปวิดีโอ', 'หมายเหตุ'
+  'ลิงก์แผนการจัดการเรียนรู้', 'ลิงก์อินโฟกราฟิก', 'ลิงก์คลิปการสอน', 'หมายเหตุ'
 ];
+
+const PTYPE_NAME = {
+  '1': 'แนวปฏิบัติที่เป็นเลิศในการจัดการเรียนรู้เชิงรุก (Active Learning)',
+  '2': 'แนวปฏิบัติที่เป็นเลิศ ด้านการบริหารสถานศึกษา',
+  '3': 'แนวปฏิบัติที่เป็นเลิศ ด้านการจัดการเรียนรู้'
+};
+const PTYPE_CODE = { '1': 'AL', '2': 'ADM', '3': 'LRN' };
 
 /* ---------------------------------------------------------------
  *  doPost — รับการส่งผลงานจาก index.html
@@ -45,52 +50,66 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     if (d.action !== 'submit') return json({ ok: false, message: 'คำสั่งไม่ถูกต้อง' });
 
+    const t = String(d.ptype || '');
+    if (!PTYPE_NAME[t]) return json({ ok: false, message: 'กรุณาเลือกประเภทผลงาน' });
+
     /* ---- ตรวจสอบข้อมูลฝั่งเซิร์ฟเวอร์ ---- */
-    const need = ['prefix','fullname','position','academic','schoolGroup','school',
-                  'phone','lineId','subject','title','level','videoUrl','fileData','fileName'];
+    var need = ['prefix','fullname','position','academic','schoolGroup','school',
+                'phone','lineId','title','infoData','infoName'];
+    if (t === '1') {
+      need = need.concat(['subject','level','videoUrl','planData','planName']);
+    }
     for (var i = 0; i < need.length; i++) {
       if (!d[need[i]] || String(d[need[i]]).trim() === '') {
         return json({ ok: false, message: 'ข้อมูลไม่ครบถ้วน (' + need[i] + ')' });
       }
     }
-    if (!/^https?:\/\/.+/i.test(String(d.videoUrl))) {
-      return json({ ok: false, message: 'ลิงก์คลิปวิดีโอไม่ถูกต้อง' });
+    if (t === '1' && !/^https?:\/\/.+/i.test(String(d.videoUrl))) {
+      return json({ ok: false, message: 'ลิงก์คลิปการสอนไม่ถูกต้อง' });
     }
-    if (!/\.pdf$/i.test(String(d.fileName))) {
-      return json({ ok: false, message: 'รองรับเฉพาะไฟล์ PDF เท่านั้น' });
+    if (!/\.(jpe?g|png)$/i.test(String(d.infoName))) {
+      return json({ ok: false, message: 'อินโฟกราฟิกต้องเป็นไฟล์ JPG หรือ PNG เท่านั้น' });
     }
-
-    /* ---- ถอดรหัสไฟล์และตรวจขนาด ---- */
-    const bytes = Utilities.base64Decode(d.fileData);
-    if (bytes.length > MAX_BYTES) {
-      return json({ ok: false, message: 'ไฟล์มีขนาดเกิน 10 MB' });
-    }
-    // ตรวจ magic number ของ PDF  (%PDF)
-    if (!(bytes[0] === 37 && bytes[1] === 80 && bytes[2] === 68 && bytes[3] === 70)) {
-      return json({ ok: false, message: 'ไฟล์ที่แนบไม่ใช่ไฟล์ PDF ที่ถูกต้อง' });
+    if (t === '1' && !/\.pdf$/i.test(String(d.planName))) {
+      return json({ ok: false, message: 'แผนการจัดการเรียนรู้ต้องเป็นไฟล์ PDF เท่านั้น' });
     }
 
     const sh  = getSheet();
-    const seq = Math.max(0, sh.getLastRow() - 1) + 1;   // แถวที่ 1 คือหัวตาราง
+    const seq = Math.max(0, sh.getLastRow() - 1) + 1;
     const now = new Date();
-    const refCode = makeRef(now, seq);
+    const refCode = makeRef(now, seq, t);
+    const folder = getFolder();
 
-    /* ---- อัปโหลดไฟล์ลง Drive ---- */
-    const safeName = String(d.fileName).replace(/[\\/:*?"<>|]/g, '_').replace(/\.pdf$/i, '');
-    const finalName = refCode + '__' + d.school + '__' + safeName + '.pdf';
-    const blob = Utilities.newBlob(bytes, 'application/pdf', finalName);
-    const file = getFolder().createFile(blob);
-    try {
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    } catch (err) { /* บางองค์กรปิดการแชร์สาธารณะ — ข้ามได้ */ }
-    file.setDescription('Best Practice AL | ' + d.subject + ' | ' + d.school);
+    /* ---- อัปโหลดอินโฟกราฟิก ---- */
+    const infoBytes = Utilities.base64Decode(d.infoData);
+    if (infoBytes.length > MAX_BYTES) return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกมีขนาดเกิน 10 MB' });
+    const isPng = (infoBytes[0] === -119 || infoBytes[0] === 137);
+    const isJpg = (infoBytes[0] === -1  || infoBytes[0] === 255);
+    if (!isPng && !isJpg) return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกไม่ใช่รูปภาพ JPG/PNG ที่ถูกต้อง' });
+    const infoExt = isPng ? '.png' : '.jpg';
+    const infoFile = saveFile(folder, infoBytes, isPng ? 'image/png' : 'image/jpeg',
+      refCode + '__INFO__' + safe(d.school) + infoExt, PTYPE_NAME[t], d.school);
+
+    /* ---- อัปโหลดแผนการจัดการเรียนรู้ (เฉพาะประเภท 1) ---- */
+    var planUrl = '';
+    if (t === '1') {
+      const planBytes = Utilities.base64Decode(d.planData);
+      if (planBytes.length > MAX_BYTES) return json({ ok: false, message: 'ไฟล์แผนการจัดการเรียนรู้มีขนาดเกิน 10 MB' });
+      if (!(planBytes[0] === 37 && planBytes[1] === 80 && planBytes[2] === 68 && planBytes[3] === 70)) {
+        return json({ ok: false, message: 'ไฟล์แผนการจัดการเรียนรู้ไม่ใช่ PDF ที่ถูกต้อง' });
+      }
+      const planFile = saveFile(folder, planBytes, 'application/pdf',
+        refCode + '__PLAN__' + safe(d.school) + '.pdf', PTYPE_NAME[t], d.school);
+      planUrl = planFile.getUrl();
+    }
 
     /* ---- บันทึกลงชีต ---- */
     sh.appendRow([
       seq,
       Utilities.formatDate(now, 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss'),
       refCode,
-      d.subject,
+      PTYPE_NAME[t],
+      d.subject || '',
       d.title,
       d.prefix,
       d.fullname,
@@ -98,17 +117,16 @@ function doPost(e) {
       d.academic,
       d.schoolGroup,
       d.school,
-      d.level,
+      d.level || '',
       "'" + String(d.phone),
       "'" + String(d.lineId),
-      file.getUrl(),
-      d.fileName,
-      Math.round(bytes.length / 1024),
-      d.videoUrl,
+      planUrl,
+      infoFile.getUrl(),
+      d.videoUrl || '',
       d.note || ''
     ]);
 
-    return json({ ok: true, refCode: refCode, fileUrl: file.getUrl() });
+    return json({ ok: true, refCode: refCode });
 
   } catch (err) {
     return json({ ok: false, message: 'เกิดข้อผิดพลาดที่เซิร์ฟเวอร์: ' + err.message });
@@ -118,7 +136,7 @@ function doPost(e) {
 }
 
 /* ---------------------------------------------------------------
- *  doGet — ใช้กับหน้าผู้ดูแลระบบ (JSONP) และตรวจสอบสถานะ
+ *  doGet — หน้าผู้ดูแลระบบ (JSONP)
  * --------------------------------------------------------------- */
 function doGet(e) {
   const p  = (e && e.parameter) ? e.parameter : {};
@@ -129,7 +147,7 @@ function doGet(e) {
     out = (p.token === ADMIN_PASS) ? { ok: true, rows: readAll() }
                                    : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else {
-    out = { ok: true, message: 'Best Practice AL API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
+    out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
   }
   return cb ? jsonp(cb, out) : json(out);
 }
@@ -137,6 +155,20 @@ function doGet(e) {
 /* ---------------------------------------------------------------
  *  ฟังก์ชันช่วย
  * --------------------------------------------------------------- */
+function saveFile(folder, bytes, mime, name, ptypeName, school) {
+  const blob = Utilities.newBlob(bytes, mime, name);
+  const file = folder.createFile(blob);
+  try {
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  } catch (err) { /* บางองค์กรปิดการแชร์สาธารณะ — ข้ามได้ */ }
+  file.setDescription('Best Practice 2569 | ' + ptypeName + ' | ' + school);
+  return file;
+}
+
+function safe(s) {
+  return String(s || '').replace(/[\\/:*?"<>|]/g, '_');
+}
+
 function readAll() {
   const sh = getSheet();
   const last = sh.getLastRow();
@@ -144,37 +176,43 @@ function readAll() {
   const v = sh.getRange(2, 1, last - 1, HEADERS.length).getDisplayValues();
   return v.map(function (r) {
     return {
-      seq: r[0], timestamp: r[1], refCode: r[2], subject: r[3], title: r[4],
-      prefix: r[5], fullname: r[6], name: (r[5] || '') + r[6],
-      position: r[7], academic: r[8], schoolGroup: r[9], school: r[10], level: r[11],
-      phone: r[12], lineId: r[13], fileUrl: r[14], fileName: r[15], fileSize: r[16],
-      videoUrl: r[17], note: r[18]
+      seq: r[0], timestamp: r[1], refCode: r[2], ptype: r[3], subject: r[4], title: r[5],
+      prefix: r[6], fullname: r[7], name: (r[6] || '') + r[7],
+      position: r[8], academic: r[9], schoolGroup: r[10], school: r[11], level: r[12],
+      phone: r[13], lineId: r[14], planUrl: r[15], infoUrl: r[16], videoUrl: r[17], note: r[18]
     };
   }).reverse();          // รายการล่าสุดขึ้นก่อน
 }
 
-function makeRef(now, n) {
+function makeRef(now, n, t) {
   const y = (now.getFullYear() + 543).toString().slice(-2);   // พ.ศ. 2 หลัก
-  return 'AL' + y + '-' + ('0000' + n).slice(-4);
+  return PTYPE_CODE[t] + y + '-' + ('0000' + n).slice(-4);
 }
 
 function getSheet() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   var sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) {
-    sh = ss.insertSheet(SHEET_NAME);
-  }
+  if (!sh) sh = ss.insertSheet(SHEET_NAME);
+
   if (sh.getLastRow() === 0) {
-    sh.appendRow(HEADERS);
-    const h = sh.getRange(1, 1, 1, HEADERS.length);
-    h.setFontWeight('bold').setBackground('#1e4d8c').setFontColor('#ffffff')
-     .setVerticalAlignment('middle').setHorizontalAlignment('center');
-    sh.setFrozenRows(1);
-    sh.setRowHeight(1, 38);
-    [55, 155, 105, 210, 320, 90, 190, 170, 160, 250, 230, 165, 125, 140, 230, 220, 110, 240, 260]
-      .forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
+    writeHeader(sh);
+  } else {
+    // ชีตเดิมมี 19 คอลัมน์แบบเก่า — ถ้าหัวตารางไม่ตรง ให้เขียนหัวใหม่ทับ (ข้อมูลเดิมยังอยู่)
+    const cur = sh.getRange(1, 1, 1, HEADERS.length).getDisplayValues()[0];
+    if (cur[3] !== HEADERS[3]) writeHeader(sh);
   }
   return sh;
+}
+
+function writeHeader(sh) {
+  sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+  const h = sh.getRange(1, 1, 1, HEADERS.length);
+  h.setFontWeight('bold').setBackground('#1e4d8c').setFontColor('#ffffff')
+   .setVerticalAlignment('middle').setHorizontalAlignment('center').setWrap(true);
+  sh.setFrozenRows(1);
+  sh.setRowHeight(1, 42);
+  [55, 155, 110, 300, 210, 320, 90, 190, 170, 150, 250, 230, 165, 125, 140, 220, 220, 240, 260]
+    .forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
 }
 
 function getFolder() {
@@ -187,14 +225,13 @@ function json(obj) {
 }
 
 function jsonp(cb, obj) {
-  const safe = String(cb).replace(/[^A-Za-z0-9_$]/g, '');
-  return ContentService.createTextOutput(safe + '(' + JSON.stringify(obj) + ');')
+  const safeCb = String(cb).replace(/[^A-Za-z0-9_$]/g, '');
+  return ContentService.createTextOutput(safeCb + '(' + JSON.stringify(obj) + ');')
     .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 /* ---------------------------------------------------------------
- *  ▶ ทดสอบการตั้งค่า — กด Run ฟังก์ชันนี้ 1 ครั้งหลังตั้งค่าเสร็จ
- *     แล้วดูผลที่เมนู "บันทึกการดำเนินการ" (Execution log)
+ *  ▶ ทดสอบการตั้งค่า — กด Run ฟังก์ชันนี้เพื่อตรวจการเชื่อมต่อ
  * --------------------------------------------------------------- */
 function ทดสอบการตั้งค่า() {
   var msg = [];
@@ -206,9 +243,6 @@ function ทดสอบการตั้งค่า() {
     var f = getFolder();
     msg.push('✅ เชื่อมต่อโฟลเดอร์ Drive สำเร็จ: ' + f.getName());
   } catch (e) { msg.push('❌ โฟลเดอร์ Drive: ' + e.message); }
-  msg.push(ADMIN_PASS === 'udn1@bestal2569'
-    ? '⚠️ กรุณาเปลี่ยนรหัสผ่านผู้ดูแล (ADMIN_PASS) เป็นรหัสของท่านเอง'
-    : '✅ ตั้งรหัสผ่านผู้ดูแลเรียบร้อย');
   Logger.log(msg.join('\n'));
   return msg.join('\n');
 }
