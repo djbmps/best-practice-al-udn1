@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบส่งผลงาน Best Practice Active Learning | สพป.อุดรธานี เขต 1</title>
+<title>ระบบส่งผลงานแนวปฏิบัติที่เป็นเลิศ (Best Practice) 2569 | สพป.อุดรธานี เขต 1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -11,6 +11,7 @@
 :root{
   --brand:#1e4d8c; --brand-dk:#143766; --brand-lt:#e8f0fa;
   --accent:#f5a623; --accent-dk:#d18a10;
+  --g1:#1e4d8c; --g2:#1f8a5f; --g3:#e07b26;
   --ok:#1f8a5f; --err:#c0392b;
   --ink:#1c2733; --muted:#6b7a8c; --line:#dde5ee; --bg:#f4f7fb;
   --r:14px; --shadow:0 2px 10px rgba(20,55,102,.07);
@@ -21,16 +22,17 @@ a{color:var(--brand)}
 
 /* ---------- Header ---------- */
 .topbar{background:linear-gradient(135deg,var(--brand-dk),var(--brand) 55%,#2a6bb5);color:#fff;padding:26px 20px 30px}
-.topbar .wrap{max-width:920px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.crest{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.5);
+.topbar .wrap{max-width:960px;margin:0 auto;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.crest{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.5);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;text-align:center;line-height:1.15;flex:none}
-.topbar h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.2px}
-.topbar p{margin:3px 0 0;font-size:15px;opacity:.9}
-.badge-al{display:inline-block;margin-top:8px;background:var(--accent);color:#3d2a00;font-weight:600;
-  font-size:13px;padding:3px 12px;border-radius:999px}
+.topbar .org{font-size:15px;opacity:.9;margin:0}
+.topbar h1{margin:2px 0 0;font-size:24px;font-weight:700;letter-spacing:-.2px}
+.topbar .yr{margin:2px 0 0;font-size:16px;opacity:.95}
+.slogan{display:inline-block;margin-top:9px;background:var(--accent);color:#3d2a00;font-weight:600;
+  font-size:13.5px;padding:3px 13px;border-radius:999px}
 
 /* ---------- Layout ---------- */
-.page{max-width:920px;margin:-14px auto 60px;padding:0 16px}
+.page{max-width:960px;margin:-14px auto 60px;padding:0 16px}
 .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
 .card > h2{margin:0;padding:15px 20px;font-size:17px;font-weight:600;background:var(--brand-lt);
   color:var(--brand-dk);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
@@ -38,9 +40,40 @@ a{color:var(--brand)}
   display:flex;align-items:center;justify-content:center;flex:none}
 .card .body{padding:20px}
 
+.deadline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
+  border-left:6px solid var(--accent);border-radius:var(--r);padding:14px 18px;margin-bottom:18px;box-shadow:var(--shadow)}
+.deadline .dl{font-size:15.5px}
+.deadline b{color:var(--accent-dk)}
+.deadline .ph{margin-left:auto;font-size:14.5px;color:var(--muted);text-align:right}
+
 .notice{background:#fffaf0;border:1px solid #f2d9a8;border-radius:var(--r);padding:14px 18px;margin-bottom:18px;font-size:15px}
 .notice b{color:var(--accent-dk)}
 .notice ul{margin:8px 0 0;padding-left:20px}
+.notice li{margin-bottom:3px}
+
+/* ---------- Type cards ---------- */
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.type{position:relative}
+.type input{position:absolute;opacity:0;width:0;height:0}
+.type span.box{display:block;padding:16px;border:2px solid var(--line);border-radius:12px;cursor:pointer;
+  background:#fff;height:100%;transition:all .15s}
+.type .num{display:inline-flex;width:28px;height:28px;border-radius:50%;color:#fff;font-weight:700;font-size:15px;
+  align-items:center;justify-content:center;margin-bottom:8px}
+.type:nth-child(1) .num{background:var(--g1)} .type:nth-child(2) .num{background:var(--g2)} .type:nth-child(3) .num{background:var(--g3)}
+.type .tt{font-weight:600;font-size:15.5px;display:block;line-height:1.45}
+.type .ds{font-size:13.5px;color:var(--muted);margin-top:7px;display:block;line-height:1.5}
+.type input:checked + span.box{border-color:var(--brand);background:var(--brand-lt);box-shadow:0 0 0 3px rgba(30,77,140,.1)}
+.type:nth-child(2) input:checked + span.box{border-color:var(--g2);background:#eef8f3;box-shadow:0 0 0 3px rgba(31,138,95,.1)}
+.type:nth-child(3) input:checked + span.box{border-color:var(--g3);background:#fdf3ea;box-shadow:0 0 0 3px rgba(224,123,38,.1)}
+.type span.box:hover{border-color:#a9bdd6}
+
+.eligible{display:none;margin-top:14px;background:#f7f9fc;border:1px solid var(--line);border-radius:11px;padding:13px 16px;font-size:14.5px}
+.eligible.on{display:block}
+.eligible b{color:var(--brand-dk)}
+.eligible .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.eligible .links a{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;
+  padding:5px 12px;font-size:13.5px;text-decoration:none}
+.eligible .links a:hover{border-color:var(--brand)}
 
 /* ---------- Form fields ---------- */
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
@@ -49,7 +82,7 @@ a{color:var(--brand)}
 @media(max-width:640px){.c8,.c6,.c4,.c3{grid-column:span 12}}
 label{font-size:14.5px;font-weight:500;color:#2c3a49}
 .req::after{content:" *";color:var(--err);font-weight:700}
-input[type=text],input[type=tel],input[type=url],input[type=email],select,textarea{
+input[type=text],input[type=tel],input[type=url],select,textarea{
   font-family:inherit;font-size:15.5px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;
   background:#fff;color:var(--ink);width:100%;transition:border-color .15s,box-shadow .15s}
 select{cursor:pointer}
@@ -69,23 +102,23 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
 .sub span .dot{width:18px;height:18px;border-radius:50%;border:2px solid #c3cfdd;flex:none;transition:all .15s}
 .sub input:checked + span{border-color:var(--brand);background:var(--brand-lt);font-weight:600;color:var(--brand-dk)}
 .sub input:checked + span .dot{border-color:var(--brand);background:var(--brand);box-shadow:inset 0 0 0 3px #fff}
-.sub input:focus-visible + span{box-shadow:0 0 0 3px rgba(30,77,140,.2)}
 .sub span:hover{border-color:#a9bdd6}
 
 /* ---------- File drop ---------- */
-.drop{border:2px dashed #c3cfdd;border-radius:12px;padding:26px 18px;text-align:center;cursor:pointer;
+.drop{border:2px dashed #c3cfdd;border-radius:12px;padding:24px 18px;text-align:center;cursor:pointer;
   background:#fbfdff;transition:all .15s}
 .drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-lt)}
-.drop .ico{font-size:30px;line-height:1}
+.drop .ico{font-size:28px;line-height:1}
 .drop .t{font-weight:600;margin-top:6px}
 .drop .s{font-size:13.5px;color:var(--muted)}
 .filebox{display:none;align-items:center;gap:12px;padding:12px 14px;border:1px solid #b9e0cc;
   background:#f0faf5;border-radius:11px}
 .filebox.on{display:flex}
 .filebox .fi{font-size:24px}
+.filebox img.thumb{width:46px;height:46px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
 .filebox .fn{flex:1;min-width:0;font-size:14.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .filebox .fs{font-size:13px;color:var(--muted)}
-.filebox button{border:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;
+.filebox button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;
   cursor:pointer;font-family:inherit;font-size:13.5px;color:var(--err)}
 
 /* ---------- Consent + submit ---------- */
@@ -113,15 +146,16 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
 .result h3{margin:12px 0 6px;font-size:22px}
 .result .ref{display:inline-block;margin-top:8px;background:var(--brand-lt);border:1px dashed var(--brand);
   color:var(--brand-dk);padding:8px 18px;border-radius:9px;font-weight:700;letter-spacing:.5px}
-.result p{color:var(--muted);margin:10px auto 0;max-width:520px}
+.result p{color:var(--muted);margin:10px auto 0;max-width:540px}
 .alert{display:none;margin-top:14px;padding:12px 16px;border-radius:10px;font-size:15px}
 .alert.on{display:block}
 .alert.e{background:#fdecea;border:1px solid #f3b7b1;color:#8e2b21}
 
-.foot{text-align:center;font-size:13.5px;color:var(--muted);padding:0 16px 40px}
+.foot{text-align:center;font-size:13.5px;color:var(--muted);padding:0 16px 40px;line-height:1.75}
 .setup{background:#fff4f4;border:1px solid #f0c2c2;color:#8e2b21;border-radius:var(--r);padding:14px 18px;
   margin-bottom:18px;font-size:14.5px;display:none}
 .setup.on{display:block}
+.hidden{display:none !important}
 </style>
 </head>
 <body>
@@ -130,9 +164,10 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
   <div class="wrap">
     <div class="crest">สพป.<br>อด.1</div>
     <div>
-      <h1>ระบบส่งผลงาน Best Practice การจัดการเรียนรู้เชิงรุก (Active Learning)</h1>
-      <p>สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
-      <span class="badge-al">สำหรับครูผู้สอน</span>
+      <p class="org">สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
+      <h1>ระบบส่งผลงานแนวปฏิบัติที่เป็นเลิศ (Best Practice)</h1>
+      <p class="yr">ประจำปีงบประมาณ 2569</p>
+      <span class="slogan">Teach less, learn more for happiness — “เด็กอุดร 1 เป็นที่ 1”</span>
     </div>
   </div>
 </header>
@@ -141,25 +176,82 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
 
   <div class="setup" id="setup">
     <b>⚙️ ยังไม่ได้ตั้งค่าระบบ</b> — กรุณาเปิดไฟล์นี้ด้วยโปรแกรมแก้ไขข้อความ แล้วใส่ URL ของ Google Apps Script
-    Web App ลงในตัวแปร <code>API_URL</code> ที่ด้านล่างของไฟล์ (ดูขั้นตอนใน “คู่มือการติดตั้ง”)
+    Web App ลงในตัวแปร <code>API_URL</code> ที่ด้านล่างของไฟล์
+  </div>
+
+  <div class="deadline">
+    <div class="dl">🗓️ เปิดรับผลงาน <b>ตั้งแต่บัดนี้ ถึงวันที่ 24 สิงหาคม 2569</b></div>
+    <div class="ph">สอบถามเพิ่มเติม: กลุ่มนิเทศ ติดตาม และประเมินผลการจัดการศึกษา<br>
+      โทร. 042-326-030 ต่อ 109 · 0-4222-2041 ต่อ 35 · 09-5659-6444</div>
   </div>
 
   <div class="notice">
     <b>คำชี้แจงการส่งผลงาน</b>
     <ul>
-      <li>ส่งผลงานได้ <b>1 คน ต่อ 1 ผลงาน</b> โดยเลือกกลุ่มสาระการเรียนรู้ที่ตรงกับผลงานมากที่สุด</li>
-      <li>แนบ <b>แผนการจัดการเรียนรู้ 1 ชั่วโมง</b> เป็นไฟล์ PDF ขนาดไม่เกิน 10 MB</li>
-      <li>คลิปวิดีโอการจัดการเรียนการสอน ให้อัปโหลดขึ้น YouTube / Google Drive แล้ว
+      <li>เลือก <b>ประเภทผลงาน</b> ที่ต้องการส่ง จากนั้นระบบจะแสดงช่องกรอกและไฟล์แนบที่ต้องใช้ให้อัตโนมัติ</li>
+      <li>ส่งได้ <b>1 คน ต่อ 1 ผลงาน ต่อ 1 ประเภท</b> หากส่งหลายประเภทให้กรอกแบบฟอร์มแยกครั้ง</li>
+      <li>คลิปการสอน ให้อัปโหลดขึ้น YouTube / Google Drive แล้ว
           <b>ตั้งค่าการแชร์เป็นสาธารณะหรือ “ทุกคนที่มีลิงก์”</b> จากนั้นนำลิงก์มาวางในแบบฟอร์ม</li>
       <li>เมื่อส่งสำเร็จ ระบบจะแสดง <b>รหัสอ้างอิง</b> โปรดบันทึกไว้เพื่อใช้ติดตามผล</li>
+      <li>อ้างถึงหนังสือ ที่ ศธ 04176/ว3417 ลงวันที่ 17 สิงหาคม 2569</li>
     </ul>
   </div>
 
   <form id="frm" novalidate>
 
-    <!-- 1 : ข้อมูลผู้ส่ง -->
+    <!-- 1 : ประเภทผลงาน -->
     <section class="card">
-      <h2><span class="n">1</span> ข้อมูลผู้ส่งผลงาน</h2>
+      <h2><span class="n">1</span> ประเภทผลงานที่ส่งเข้ารับการคัดเลือก</h2>
+      <div class="body">
+        <div class="f" id="wrapType">
+          <div class="types">
+            <label class="type">
+              <input type="radio" name="ptype" value="1">
+              <span class="box">
+                <span class="num">1</span>
+                <span class="tt">แนวปฏิบัติที่เป็นเลิศในการจัดการเรียนรู้เชิงรุก (Active Learning)</span>
+                <span class="ds">สำหรับครูผู้สอน — เลือกกลุ่มสาระการเรียนรู้<br>
+                  ส่ง 3 รายการ: แผนการจัดการเรียนรู้ · คลิปการสอน · อินโฟกราฟิก</span>
+              </span>
+            </label>
+            <label class="type">
+              <input type="radio" name="ptype" value="2">
+              <span class="box">
+                <span class="num">2</span>
+                <span class="tt">แนวปฏิบัติที่เป็นเลิศ ด้านการบริหารสถานศึกษา</span>
+                <span class="ds">การบริหารที่ส่งผลต่อการพัฒนาการจัดการเรียนรู้ หรือยกระดับผลสัมฤทธิ์<br>
+                  ส่ง: อินโฟกราฟิก 1 ชิ้น</span>
+              </span>
+            </label>
+            <label class="type">
+              <input type="radio" name="ptype" value="3">
+              <span class="box">
+                <span class="num">3</span>
+                <span class="tt">แนวปฏิบัติที่เป็นเลิศ ด้านการจัดการเรียนรู้</span>
+                <span class="ds">การพัฒนาการจัดการเรียนรู้ที่พัฒนาผลสัมฤทธิ์ทางการเรียน<br>
+                  ส่ง: อินโฟกราฟิก 1 ชิ้น</span>
+              </span>
+            </label>
+          </div>
+          <div class="err-msg" style="margin-top:8px">กรุณาเลือกประเภทผลงาน 1 ประเภท</div>
+        </div>
+
+        <div class="eligible" id="eligible">
+          <b>⚠️ เงื่อนไขประเภทที่ 2 และ 3</b> — เฉพาะโรงเรียนที่มีผลสัมฤทธิ์ทางการเรียนสูงกว่าระดับประเทศ
+          ต่อเนื่อง 3 ปีการศึกษา (2566–2568) กรุณาตรวจสอบรายชื่อโรงเรียนก่อนส่ง
+          <div class="links">
+            <a href="https://shorturl.asia/sHRTY" target="_blank" rel="noopener">📋 รายชื่อรวม (RT, NT, O-NET)</a>
+            <a href="https://shorturl.asia/dWOJD" target="_blank" rel="noopener">RT ป.1</a>
+            <a href="https://shorturl.asia/2TBJh" target="_blank" rel="noopener">NT ป.3</a>
+            <a href="https://shorturl.asia/KUpV3" target="_blank" rel="noopener">O-NET ป.6 / ม.3</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 : ข้อมูลผู้ส่ง -->
+    <section class="card">
+      <h2><span class="n">2</span> ข้อมูลผู้ส่งผลงาน</h2>
       <div class="body">
         <div class="grid">
           <div class="f c3">
@@ -202,10 +294,10 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
             <select id="academic" name="academic">
               <option value="">— เลือก —</option>
               <option>ไม่มีวิทยฐานะ</option>
-              <option>ครูชำนาญการ</option>
-              <option>ครูชำนาญการพิเศษ</option>
-              <option>ครูเชี่ยวชาญ</option>
-              <option>ครูเชี่ยวชาญพิเศษ</option>
+              <option>ชำนาญการ</option>
+              <option>ชำนาญการพิเศษ</option>
+              <option>เชี่ยวชาญ</option>
+              <option>เชี่ยวชาญพิเศษ</option>
             </select>
             <div class="err-msg">กรุณาเลือกวิทยฐานะ</div>
           </div>
@@ -224,9 +316,9 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
       </div>
     </section>
 
-    <!-- 2 : สังกัด -->
+    <!-- 3 : สังกัด -->
     <section class="card">
-      <h2><span class="n">2</span> กลุ่มโรงเรียนและโรงเรียน</h2>
+      <h2><span class="n">3</span> กลุ่มโรงเรียนและโรงเรียน</h2>
       <div class="body">
         <div class="grid">
           <div class="f c6">
@@ -245,9 +337,9 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
       </div>
     </section>
 
-    <!-- 3 : กลุ่มสาระ -->
-    <section class="card">
-      <h2><span class="n">3</span> กลุ่มสาระการเรียนรู้ / ประเภทผลงาน</h2>
+    <!-- 4 : กลุ่มสาระ (เฉพาะประเภท 1) -->
+    <section class="card hidden" id="secSubject">
+      <h2><span class="n">4</span> กลุ่มสาระการเรียนรู้</h2>
       <div class="body">
         <div class="f" id="wrapSubject">
           <div class="subs" id="subs"></div>
@@ -256,17 +348,18 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
       </div>
     </section>
 
-    <!-- 4 : ผลงาน -->
+    <!-- 5 : ผลงาน -->
     <section class="card">
-      <h2><span class="n">4</span> รายละเอียดผลงานและไฟล์แนบ</h2>
+      <h2><span class="n" id="secWorkNo">5</span> รายละเอียดผลงานและไฟล์แนบ</h2>
       <div class="body">
         <div class="grid">
           <div class="f c12">
-            <label class="req" for="title">ชื่อผลงาน Best Practice</label>
+            <label class="req" for="title">ชื่อผลงาน</label>
             <input type="text" id="title" name="title" placeholder="เช่น การจัดการเรียนรู้แบบ Active Learning ด้วยเกมคำศัพท์...">
             <div class="err-msg">กรุณากรอกชื่อผลงาน</div>
           </div>
-          <div class="f c6">
+
+          <div class="f c6 t1only" id="wrapLevel">
             <label class="req" for="level">ระดับชั้นที่จัดการเรียนรู้</label>
             <select id="level" name="level">
               <option value="">— เลือก —</option>
@@ -279,27 +372,44 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
             </select>
             <div class="err-msg">กรุณาเลือกระดับชั้น</div>
           </div>
-          <div class="f c6">
-            <label class="req" for="video">ลิงก์คลิปวิดีโอการจัดการเรียนการสอน</label>
+          <div class="f c6 t1only" id="wrapVideo">
+            <label class="req" for="video">ลิงก์คลิปการสอน</label>
             <input type="url" id="video" name="video" placeholder="https://youtu.be/... หรือ https://drive.google.com/...">
             <div class="err-msg">กรุณากรอกลิงก์ที่ขึ้นต้นด้วย http:// หรือ https://</div>
           </div>
 
-          <div class="f c12">
-            <label class="req">ไฟล์แผนการจัดการเรียนรู้ 1 ชั่วโมง (PDF ไม่เกิน 10 MB)</label>
-            <div class="drop" id="drop">
+          <div class="f c12 t1only" id="wrapPlan">
+            <label class="req">① แผนการจัดการเรียนรู้ 1 ชั่วโมง <span style="font-weight:400;color:var(--muted)">(PDF ไม่เกิน 10 MB)</span></label>
+            <div class="drop" id="dropPlan">
               <div class="ico">📄</div>
               <div class="t">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
               <div class="s">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 10 MB</div>
             </div>
-            <input type="file" id="file" accept="application/pdf,.pdf" hidden>
-            <div class="filebox" id="filebox">
+            <input type="file" id="filePlan" accept="application/pdf,.pdf" hidden>
+            <div class="filebox" id="boxPlan">
               <span class="fi">📕</span>
-              <span class="fn" id="fname"></span>
-              <span class="fs" id="fsize"></span>
-              <button type="button" id="fclear">ลบไฟล์</button>
+              <span class="fn" id="namePlan"></span>
+              <span class="fs" id="sizePlan"></span>
+              <button type="button" data-clear="Plan">ลบไฟล์</button>
             </div>
-            <div class="err-msg" id="fileErr">กรุณาแนบไฟล์แผนการจัดการเรียนรู้ (PDF ไม่เกิน 10 MB)</div>
+            <div class="err-msg" id="errPlan">กรุณาแนบไฟล์แผนการจัดการเรียนรู้ (PDF ไม่เกิน 10 MB)</div>
+          </div>
+
+          <div class="f c12">
+            <label class="req" id="lblInfo">③ อินโฟกราฟิก <span style="font-weight:400;color:var(--muted)">(รูปภาพ JPG หรือ PNG ไม่เกิน 10 MB)</span></label>
+            <div class="drop" id="dropInfo">
+              <div class="ico">🖼️</div>
+              <div class="t">คลิกเพื่อเลือกรูป หรือลากรูปมาวางที่นี่</div>
+              <div class="s">รองรับไฟล์ JPG และ PNG ขนาดไม่เกิน 10 MB</div>
+            </div>
+            <input type="file" id="fileInfo" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
+            <div class="filebox" id="boxInfo">
+              <img class="thumb" id="thumbInfo" alt="">
+              <span class="fn" id="nameInfo"></span>
+              <span class="fs" id="sizeInfo"></span>
+              <button type="button" data-clear="Info">ลบไฟล์</button>
+            </div>
+            <div class="err-msg" id="errInfo">กรุณาแนบไฟล์อินโฟกราฟิก (JPG หรือ PNG ไม่เกิน 10 MB)</div>
           </div>
 
           <div class="f c12">
@@ -310,9 +420,9 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
       </div>
     </section>
 
-    <!-- 5 : ยืนยัน -->
+    <!-- 6 : ยืนยัน -->
     <section class="card">
-      <h2><span class="n">5</span> ยืนยันการส่ง</h2>
+      <h2><span class="n" id="secConfirmNo">6</span> ยืนยันการส่ง</h2>
       <div class="body">
         <div class="f" id="wrapConsent">
           <label class="consent">
@@ -339,7 +449,7 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
     <div class="ico">✅</div>
     <h3>ส่งผลงานเรียบร้อยแล้ว</h3>
     <div class="ref" id="refCode">—</div>
-    <p id="doneMsg">ระบบได้บันทึกผลงานของท่านเรียบร้อยแล้ว กรุณาบันทึกรหัสอ้างอิงข้างต้นไว้เพื่อใช้ติดตามผล</p>
+    <p>ระบบได้บันทึกผลงานของท่านเรียบร้อยแล้ว กรุณาบันทึกรหัสอ้างอิงข้างต้นไว้เพื่อใช้ติดตามผล</p>
     <div class="actions" style="justify-content:center">
       <button type="button" class="btn btn-ghost" onclick="location.reload()">ส่งผลงานรายการใหม่</button>
     </div>
@@ -349,7 +459,8 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
 
 <p class="foot">
   กลุ่มนิเทศ ติดตาม และประเมินผลการจัดการศึกษา<br>
-  สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1<br>
+  สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1 · 7/7 ถนนโพศรี อำเภอเมืองอุดรธานี 41000<br>
+  โทร. 042-326-030 ต่อ 109 · 0-4222-2041 ต่อ 35 · 09-5659-6444<br>
   <span style="font-size:12.5px">ข้อมูลโรงเรียน: ระบบ BIG DATA สพป.อุดรธานี เขต 1 ปีการศึกษา 2569 ภาคเรียนที่ 1</span>
 </p>
 
@@ -359,6 +470,12 @@ input:disabled,select:disabled{background:#f2f5f9;color:var(--muted);cursor:not-
    ============================================================ */
 const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
 /* ============================================================ */
+
+const PTYPES = {
+  '1':'แนวปฏิบัติที่เป็นเลิศในการจัดการเรียนรู้เชิงรุก (Active Learning)',
+  '2':'แนวปฏิบัติที่เป็นเลิศ ด้านการบริหารสถานศึกษา',
+  '3':'แนวปฏิบัติที่เป็นเลิศ ด้านการจัดการเรียนรู้'
+};
 
 const SUBJECTS = [
   "ภาษาไทย",
@@ -395,7 +512,7 @@ const SCHOOLS = {
   "กลุ่มสร้างคอม 2 (โคกโพธิ์ บ้านยวด หินโงม)": ["บ้านดอนเดื่อ", "บ้านดอนบาก", "โคกโพธิ์วิทยา", "บ้านนาน้ำชุ่ม", "บ้านยวด", "บ้านชาด", "บ้านนามั่ง", "บ้านน้ำเที่ยง", "บ้านตลิ่งชัน-สร้างแก้ว", "บ้านศรีชมชื่นบุญชิตวิทยา", "บ้านหินโงม"]
 };
 
-/* ---------- build subject cards ---------- */
+/* ---------- subject cards ---------- */
 const subsEl = document.getElementById('subs');
 SUBJECTS.forEach((s,i)=>{
   const l = document.createElement('label');
@@ -432,17 +549,36 @@ gSel.addEventListener('change',()=>{
   clearErr(sSel.closest('.f'));
 });
 
+/* ---------- type switching ---------- */
+const secSubject=document.getElementById('secSubject');
+const eligible=document.getElementById('eligible');
+const lblInfo=document.getElementById('lblInfo');
+function currentType(){ const t=document.querySelector('input[name=ptype]:checked'); return t?t.value:''; }
+
+document.querySelectorAll('input[name=ptype]').forEach(r=>r.addEventListener('change',applyType));
+function applyType(){
+  const t = currentType();
+  const isT1 = t==='1';
+  secSubject.classList.toggle('hidden', !isT1);
+  document.querySelectorAll('.t1only').forEach(el=>el.classList.toggle('hidden', !isT1));
+  eligible.classList.toggle('on', t==='2'||t==='3');
+  document.getElementById('secWorkNo').textContent = isT1 ? '5' : '4';
+  document.getElementById('secConfirmNo').textContent = isT1 ? '6' : '5';
+  lblInfo.innerHTML = (isT1 ? '③ อินโฟกราฟิก' : 'อินโฟกราฟิก') +
+    ' <span style="font-weight:400;color:var(--muted)">(รูปภาพ JPG หรือ PNG ไม่เกิน 10 MB)</span>';
+  clearErr(document.getElementById('wrapType'));
+}
+
 /* ---------- prefix "อื่น ๆ" ---------- */
 const pSel=document.getElementById('prefix'), pOtherWrap=document.getElementById('wrapPrefixOther'),
-      pOther=document.getElementById('prefixOther'), nameWrap=document.getElementById('wrapName');
+      pOther=document.getElementById('prefixOther');
 pSel.addEventListener('change',()=>{
   const on = pSel.value==='อื่น ๆ';
   pOtherWrap.style.display = on?'flex':'none';
-  nameWrap.className = on ? 'f c6' : 'f c6';
   if(!on) pOther.value='';
 });
 
-/* ---------- phone auto format ---------- */
+/* ---------- phone format ---------- */
 const phone=document.getElementById('phone');
 phone.addEventListener('input',()=>{
   let v=phone.value.replace(/\D/g,'').slice(0,10);
@@ -451,39 +587,43 @@ phone.addEventListener('input',()=>{
   phone.value=v;
 });
 
-/* ---------- file ---------- */
+/* ---------- file pickers ---------- */
 const MAXB = 10*1024*1024;
-const drop=document.getElementById('drop'), fInput=document.getElementById('file'),
-      fBox=document.getElementById('filebox'), fName=document.getElementById('fname'),
-      fSize=document.getElementById('fsize'), fErr=document.getElementById('fileErr');
-let chosen=null;
+const picked = {Plan:null, Info:null};
 
-drop.addEventListener('click',()=>fInput.click());
-drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
-drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
-drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');
-  if(e.dataTransfer.files.length) takeFile(e.dataTransfer.files[0]);});
-fInput.addEventListener('change',()=>{ if(fInput.files.length) takeFile(fInput.files[0]); });
-document.getElementById('fclear').addEventListener('click',()=>{
-  chosen=null; fInput.value=''; fBox.classList.remove('on'); drop.style.display='block';
-});
+function setupPicker(key, accept, okTest, errText){
+  const drop=document.getElementById('drop'+key), input=document.getElementById('file'+key),
+        box=document.getElementById('box'+key), nm=document.getElementById('name'+key),
+        sz=document.getElementById('size'+key), er=document.getElementById('err'+key),
+        th=document.getElementById('thumb'+key);
+  drop.addEventListener('click',()=>input.click());
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+  drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');
+    if(e.dataTransfer.files.length) take(e.dataTransfer.files[0]);});
+  input.addEventListener('change',()=>{ if(input.files.length) take(input.files[0]); });
 
-function takeFile(f){
-  const isPdf = f.type==='application/pdf' || /\.pdf$/i.test(f.name);
-  if(!isPdf){ showFileErr('รองรับเฉพาะไฟล์ PDF เท่านั้น'); return; }
-  if(f.size>MAXB){ showFileErr('ไฟล์มีขนาด '+fmt(f.size)+' ซึ่งเกิน 10 MB กรุณาลดขนาดไฟล์'); return; }
-  if(f.size===0){ showFileErr('ไฟล์ว่างเปล่า กรุณาตรวจสอบไฟล์อีกครั้ง'); return; }
-  chosen=f; fName.textContent=f.name; fSize.textContent=fmt(f.size);
-  fBox.classList.add('on'); drop.style.display='none';
-  clearErr(drop.closest('.f'));
+  function reset(){ picked[key]=null; input.value=''; box.classList.remove('on'); drop.style.display='block'; }
+  function take(f){
+    if(!okTest(f)){ reset(); er.textContent=errText; drop.closest('.f').classList.add('bad'); return; }
+    if(f.size>MAXB){ reset(); er.textContent='ไฟล์มีขนาด '+fmt(f.size)+' ซึ่งเกิน 10 MB กรุณาลดขนาดไฟล์'; drop.closest('.f').classList.add('bad'); return; }
+    if(f.size===0){ reset(); er.textContent='ไฟล์ว่างเปล่า กรุณาตรวจสอบไฟล์อีกครั้ง'; drop.closest('.f').classList.add('bad'); return; }
+    picked[key]=f; nm.textContent=f.name; sz.textContent=fmt(f.size);
+    if(th){ th.src=URL.createObjectURL(f); }
+    box.classList.add('on'); drop.style.display='none';
+    clearErr(drop.closest('.f'));
+  }
+  document.querySelector('[data-clear="'+key+'"]').addEventListener('click',reset);
+  return reset;
 }
-function showFileErr(m){
-  chosen=null; fInput.value=''; fBox.classList.remove('on'); drop.style.display='block';
-  fErr.textContent=m; drop.closest('.f').classList.add('bad');
-}
+const resetPlan = setupPicker('Plan','pdf',
+  f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name), 'รองรับเฉพาะไฟล์ PDF เท่านั้น');
+const resetInfo = setupPicker('Info','img',
+  f=>/^image\/(jpeg|png)$/.test(f.type)||/\.(jpe?g|png)$/i.test(f.name), 'รองรับเฉพาะรูปภาพ JPG หรือ PNG เท่านั้น');
+
 function fmt(b){ return b<1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(2)+' MB'; }
 
-/* ---------- validation helpers ---------- */
+/* ---------- validation ---------- */
 function clearErr(f){ if(f) f.classList.remove('bad'); }
 document.querySelectorAll('input,select,textarea').forEach(el=>{
   el.addEventListener('input',()=>clearErr(el.closest('.f')));
@@ -493,6 +633,10 @@ document.querySelectorAll('input,select,textarea').forEach(el=>{
 function validate(){
   let bad=null;
   const set=(el,cond)=>{ const f=el.closest('.f'); if(cond){f.classList.add('bad'); bad=bad||f;} else f.classList.remove('bad'); };
+  const flag=(wrap,cond)=>{ if(cond){wrap.classList.add('bad'); bad=bad||wrap;} else wrap.classList.remove('bad'); };
+
+  const t = currentType();
+  flag(document.getElementById('wrapType'), !t);
 
   set(pSel, !pSel.value);
   if(pSel.value==='อื่น ๆ') set(pOther, !pOther.value.trim());
@@ -503,20 +647,24 @@ function validate(){
   const ln=document.getElementById('line'); set(ln, !ln.value.trim());
   set(gSel,!gSel.value); set(sSel,!sSel.value);
 
-  const subject=document.querySelector('input[name=subject]:checked');
-  const ws=document.getElementById('wrapSubject');
-  if(!subject){ ws.classList.add('bad'); bad=bad||ws; } else ws.classList.remove('bad');
-
   const ti=document.getElementById('title'); set(ti, ti.value.trim().length<5);
-  const lv=document.getElementById('level'); set(lv,!lv.value);
-  const vd=document.getElementById('video'); set(vd, !/^https?:\/\/.+\..+/i.test(vd.value.trim()));
 
-  const fw=drop.closest('.f');
-  if(!chosen){ fErr.textContent='กรุณาแนบไฟล์แผนการจัดการเรียนรู้ (PDF ไม่เกิน 10 MB)';
-    fw.classList.add('bad'); bad=bad||fw; } else fw.classList.remove('bad');
+  if(t==='1'){
+    const subject=document.querySelector('input[name=subject]:checked');
+    flag(document.getElementById('wrapSubject'), !subject);
+    const lv=document.getElementById('level'); set(lv,!lv.value);
+    const vd=document.getElementById('video'); set(vd, !/^https?:\/\/.+\..+/i.test(vd.value.trim()));
+    const fw=document.getElementById('wrapPlan');
+    if(!picked.Plan){ document.getElementById('errPlan').textContent='กรุณาแนบไฟล์แผนการจัดการเรียนรู้ (PDF ไม่เกิน 10 MB)'; }
+    flag(fw, !picked.Plan);
+  }
+
+  const iw=document.getElementById('lblInfo').closest('.f');
+  if(!picked.Info){ document.getElementById('errInfo').textContent='กรุณาแนบไฟล์อินโฟกราฟิก (JPG หรือ PNG ไม่เกิน 10 MB)'; }
+  flag(iw, !picked.Info);
 
   const cs=document.getElementById('consent'), wc=document.getElementById('wrapConsent');
-  if(!cs.checked){ wc.classList.add('bad'); bad=bad||wc; } else wc.classList.remove('bad');
+  flag(wc, !cs.checked);
 
   if(bad) bad.scrollIntoView({behavior:'smooth',block:'center'});
   return !bad;
@@ -536,15 +684,20 @@ frm.addEventListener('submit', async e=>{
   if(!API_URL){ fail('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ กรุณาติดต่อผู้ดูแลระบบ'); return; }
 
   btn.disabled=true; btn.innerHTML='<i class="spin"></i>กำลังส่งข้อมูล...';
-  bar.classList.add('on'); barI.style.width='12%';
+  bar.classList.add('on'); barI.style.width='10%';
 
   try{
-    const b64 = await toBase64(chosen);
-    barI.style.width='45%';
+    const t = currentType();
+    const infoB64 = await toBase64(picked.Info);
+    barI.style.width='35%';
+    const planB64 = picked.Plan ? await toBase64(picked.Plan) : '';
+    barI.style.width='55%';
 
     const prefix = pSel.value==='อื่น ๆ' ? pOther.value.trim() : pSel.value;
+    const subjEl = document.querySelector('input[name=subject]:checked');
     const payload = {
       action:'submit',
+      ptype:t, ptypeName:PTYPES[t],
       prefix, prefixRaw:pSel.value,
       fullname:document.getElementById('fullname').value.trim(),
       position:document.getElementById('position').value,
@@ -553,20 +706,20 @@ frm.addEventListener('submit', async e=>{
       school:sSel.value,
       phone:phone.value.trim(),
       lineId:document.getElementById('line').value.trim(),
-      subject:document.querySelector('input[name=subject]:checked').value,
+      subject: t==='1' && subjEl ? subjEl.value : '',
       title:document.getElementById('title').value.trim(),
-      level:document.getElementById('level').value,
-      videoUrl:document.getElementById('video').value.trim(),
+      level: t==='1' ? document.getElementById('level').value : '',
+      videoUrl: t==='1' ? document.getElementById('video').value.trim() : '',
       note:document.getElementById('note').value.trim(),
-      fileName:chosen.name, fileSize:chosen.size,
-      fileMime:chosen.type||'application/pdf',
-      fileData:b64
+      planName: picked.Plan?picked.Plan.name:'', planData: planB64,
+      infoName: picked.Info.name, infoData: infoB64,
+      infoMime: picked.Info.type || 'image/jpeg'
     };
 
-    barI.style.width='62%';
+    barI.style.width='68%';
     const res = await fetch(API_URL,{
       method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},  // simple request -> ไม่ต้อง preflight
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(payload)
     });
     barI.style.width='90%';
@@ -601,12 +754,15 @@ function toBase64(file){
   });
 }
 document.getElementById('btnReset').addEventListener('click',()=>setTimeout(()=>{
-  chosen=null; fBox.classList.remove('on'); drop.style.display='block';
+  resetPlan(); resetInfo();
   sSel.disabled=true; sSel.innerHTML='<option value="">— เลือกกลุ่มโรงเรียนก่อน —</option>';
   pOtherWrap.style.display='none'; schHint.innerHTML='&nbsp;';
-  document.querySelectorAll('.f.bad').forEach(f=>f.classList.remove('bad'));
+  document.querySelectorAll('.bad').forEach(f=>f.classList.remove('bad'));
   alertEl.classList.remove('on');
+  applyType();
 },0));
+
+applyType();
 </script>
 </body>
 </html>
