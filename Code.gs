@@ -67,8 +67,8 @@ function doPost(e) {
     if (t === '1' && !/^https?:\/\/.+/i.test(String(d.videoUrl))) {
       return json({ ok: false, message: 'ลิงก์คลิปการสอนไม่ถูกต้อง' });
     }
-    if (!/\.(jpe?g|png)$/i.test(String(d.infoName))) {
-      return json({ ok: false, message: 'อินโฟกราฟิกต้องเป็นไฟล์ JPG หรือ PNG เท่านั้น' });
+    if (!/\.(jpe?g|png|pdf)$/i.test(String(d.infoName))) {
+      return json({ ok: false, message: 'อินโฟกราฟิกต้องเป็นไฟล์ PDF, JPG หรือ PNG เท่านั้น' });
     }
     if (t === '1' && !/\.pdf$/i.test(String(d.planName))) {
       return json({ ok: false, message: 'แผนการจัดการเรียนรู้ต้องเป็นไฟล์ PDF เท่านั้น' });
@@ -85,9 +85,13 @@ function doPost(e) {
     if (infoBytes.length > MAX_BYTES) return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกมีขนาดเกิน 10 MB' });
     const isPng = (infoBytes[0] === -119 || infoBytes[0] === 137);
     const isJpg = (infoBytes[0] === -1  || infoBytes[0] === 255);
-    if (!isPng && !isJpg) return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกไม่ใช่รูปภาพ JPG/PNG ที่ถูกต้อง' });
-    const infoExt = isPng ? '.png' : '.jpg';
-    const infoFile = saveFile(folder, infoBytes, isPng ? 'image/png' : 'image/jpeg',
+    const isPdf = (infoBytes[0] === 37 && infoBytes[1] === 80 && infoBytes[2] === 68 && infoBytes[3] === 70);
+    if (!isPng && !isJpg && !isPdf) {
+      return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกต้องเป็น PDF, JPG หรือ PNG เท่านั้น' });
+    }
+    const infoExt  = isPdf ? '.pdf' : (isPng ? '.png' : '.jpg');
+    const infoMime = isPdf ? 'application/pdf' : (isPng ? 'image/png' : 'image/jpeg');
+    const infoFile = saveFile(folder, infoBytes, infoMime,
       refCode + '__INFO__' + safe(d.school) + infoExt, PTYPE_NAME[t], d.school);
 
     /* ---- อัปโหลดแผนการจัดการเรียนรู้ (เฉพาะประเภท 1) ---- */
