@@ -325,12 +325,18 @@ function head(){
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+/* ---- ซ่อนรายการทดสอบระบบ (ชื่อผลงานขึ้นต้นด้วย TEST-) ----
+   พิมพ์คำว่า test ในช่องค้นหา เพื่อแสดงรายการทดสอบ */
+const isTest    = r => /^TEST[-\s]/i.test(String(r.title||''));
+const showTest  = () => /test/i.test(document.getElementById('q').value);
+const baseRows  = () => showTest() ? ROWS : ROWS.filter(x=>!isTest(x));
+
 function filtered(){
   const q=document.getElementById('q').value.trim().toLowerCase();
   const ft=document.getElementById('fType').value,
         fs=document.getElementById('fSub').value, fg=document.getElementById('fGrp').value,
         fl=document.getElementById('fLv').value;
-  let r=ROWS.filter(x=>
+  let r=baseRows().filter(x=>
     (!ft||x.ptype===ft) && (!fs||x.subject===fs) && (!fg||x.schoolGroup===fg) && (!fl||x.level===fl) &&
     (!q || [x.name,x.school,x.title,x.refCode,x.schoolGroup,x.subject,x.ptype,x.lineId,x.phone]
             .join(' ').toLowerCase().includes(q)));
@@ -339,7 +345,7 @@ function filtered(){
 }
 function draw(){
   const rows=filtered(), tb=document.getElementById('tbody');
-  document.getElementById('count').textContent='แสดง '+rows.length+' จากทั้งหมด '+ROWS.length+' รายการ';
+  document.getElementById('count').textContent='แสดง '+rows.length+' จากทั้งหมด '+baseRows().length+' รายการ';
   document.getElementById('empty').style.display = rows.length?'none':'block';
   tb.innerHTML = rows.map(r=>'<tr>'+COLS.map(c=>{
     let v=r[c.k]||'';
@@ -357,7 +363,7 @@ function draw(){
 function stats(rows){
   const g=k=>new Set(rows.map(r=>r[k]).filter(Boolean)).size;
   const items=[
-    ['ผลงานทั้งหมด', ROWS.length],
+    ['ผลงานทั้งหมด', baseRows().length],
     ['ตรงเงื่อนไขที่กรอง', rows.length],
     ['โรงเรียนที่ส่ง', g('school')],
     ['กลุ่มโรงเรียนที่ส่ง', g('schoolGroup')],
