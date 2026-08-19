@@ -150,6 +150,8 @@ function doGet(e) {
   if (p.action === 'list') {
     out = (p.token === ADMIN_PASS) ? { ok: true, rows: readAll() }
                                    : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+  } else if (p.action === 'public') {
+    out = { ok: true, rows: readPublic() };
   } else {
     out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
   }
@@ -186,6 +188,33 @@ function readAll() {
       phone: r[13], lineId: r[14], planUrl: r[15], infoUrl: r[16], videoUrl: r[17], note: r[18]
     };
   }).reverse();          // รายการล่าสุดขึ้นก่อน
+}
+
+/* รายการสาธารณะ — เปิดให้ผู้ส่งตรวจสอบว่าผลงานเข้าระบบแล้ว
+   ไม่แสดงเบอร์โทรศัพท์ ID Line และลิงก์ไฟล์ */
+function readPublic() {
+  const sh = getSheet();
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  const v = sh.getRange(2, 1, last - 1, HEADERS.length).getDisplayValues();
+  const out = [];
+  for (var i = 0; i < v.length; i++) {
+    var r = v[i];
+    var title = String(r[5] || '');
+    if (/^TEST[-\s]/i.test(title)) continue;      // ซ่อนรายการทดสอบระบบ
+    out.push({
+      seq: r[0],
+      date: String(r[1] || '').split(' ')[0],
+      refCode: r[2],
+      ptype: r[3],
+      subject: r[4],
+      title: title,
+      name: (r[6] || '') + r[7],
+      schoolGroup: r[10],
+      school: r[11]
+    });
+  }
+  return out.reverse();
 }
 
 function makeRef(now, n, t) {
