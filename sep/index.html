@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ส่งผลงานเศรษฐกิจพอเพียง (Best Practice) 2569 | สพป.อุดรธานี เขต 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <img class="crest" src="../logo.svg" alt="ตราสัญลักษณ์ สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1">
+    <div>
+      <p class="org">สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
+      <h1>ส่งผลงาน การจัดการเรียนรู้เศรษฐกิจพอเพียง</h1>
+      <p class="yr">แนวปฏิบัติที่เป็นเลิศ (Best Practice) ประจำปีงบประมาณ 2569</p>
+      <span class="slogan">Teach less, learn more for happiness — “เด็กอุดร 1 เป็นที่ 1”</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <div class="deadline">
+    <div class="dl">🗓️ เปิดรับผลงาน <b>ตั้งแต่บัดนี้ ถึงวันที่ 24 สิงหาคม 2569</b></div>
+    <div class="ph">สอบถามเพิ่มเติม: กลุ่มนิเทศ ติดตาม และประเมินผลการจัดการศึกษา<br>
+      โทร. 042-326-030 ต่อ 109 · 0-4222-2041 ต่อ 35 · 09-5659-6444</div>
+  </div>
+
+  <div class="notice">
+    <b>คำชี้แจงการส่งผลงาน</b>
+    <ul>
+      <li>หน้านี้สำหรับส่งผลงาน <b>การจัดการเรียนรู้เศรษฐกิจพอเพียง</b> โดยเฉพาะ</li>
+      <li>ส่ง <b>อินโฟกราฟิก 1 ชิ้น</b> รองรับไฟล์ PDF, JPG หรือ PNG ขนาดไม่เกิน 10 MB</li>
+      <li>ส่งได้ <b>1 คน ต่อ 1 ผลงาน</b> เมื่อส่งสำเร็จ ระบบจะแสดง <b>รหัสอ้างอิง</b> โปรดบันทึกไว้</li>
+      <li>ผลงานประเภทอื่น (Active Learning · ด้านการบริหารสถานศึกษา · ด้านการจัดการเรียนรู้)
+          ส่งได้ที่ <a href="../">หน้าส่งผลงานหลัก</a></li>
+    </ul>
+  </div>
+
+  <form id="frm" novalidate>
+
+    <!-- 1 : ข้อมูลผู้ส่ง -->
+    <section class="card">
+      <h2><span class="n">1</span> ข้อมูลผู้ส่งผลงาน</h2>
+      <div class="body">
+        <div class="grid">
+          <div class="f c3">
+            <label class="req" for="prefix">คำนำหน้า</label>
+            <select id="prefix" name="prefix">
+              <option value="">— เลือก —</option>
+              <option>นาย</option><option>นาง</option><option>นางสาว</option>
+              <option>ว่าที่ ร.ต.</option><option>ว่าที่ ร.ต.หญิง</option>
+              <option>ดร.</option><option>อื่น ๆ</option>
+            </select>
+            <div class="err-msg">กรุณาเลือกคำนำหน้า</div>
+          </div>
+          <div class="f c3" id="wrapPrefixOther" style="display:none">
+            <label class="req" for="prefixOther">ระบุคำนำหน้า</label>
+            <input type="text" id="prefixOther" placeholder="เช่น พระ, ผศ.">
+            <div class="err-msg">กรุณาระบุคำนำหน้า</div>
+          </div>
+          <div class="f c6" id="wrapName">
+            <label class="req" for="fullname">ชื่อ - สกุล</label>
+            <input type="text" id="fullname" placeholder="เช่น สมชาย ใจดี">
+            <div class="err-msg">กรุณากรอกชื่อ - สกุล</div>
+          </div>
+
+          <div class="f c6">
+            <label class="req" for="position">ตำแหน่ง</label>
+            <select id="position">
+              <option value="">— เลือก —</option>
+              <option>ครูผู้ช่วย</option><option>ครู</option><option>ครูอัตราจ้าง</option>
+              <option>พนักงานราชการ</option>
+              <option>รองผู้อำนวยการสถานศึกษา</option><option>ผู้อำนวยการสถานศึกษา</option>
+              <option>อื่น ๆ</option>
+            </select>
+            <div class="err-msg">กรุณาเลือกตำแหน่ง</div>
+          </div>
+          <div class="f c6">
+            <label class="req" for="academic">วิทยฐานะ</label>
+            <select id="academic">
+              <option value="">— เลือก —</option>
+              <option>ไม่มีวิทยฐานะ</option><option>ชำนาญการ</option><option>ชำนาญการพิเศษ</option>
+              <option>เชี่ยวชาญ</option><option>เชี่ยวชาญพิเศษ</option>
+            </select>
+            <div class="err-msg">กรุณาเลือกวิทยฐานะ</div>
+          </div>
+
+          <div class="f c6">
+            <label class="req" for="phone">เบอร์โทรศัพท์</label>
+            <input type="tel" id="phone" inputmode="numeric" maxlength="12" placeholder="08X-XXX-XXXX">
+            <div class="err-msg">กรุณากรอกเบอร์โทรศัพท์ 9 - 10 หลัก</div>
+          </div>
+          <div class="f c6">
+            <label class="req" for="line">ID Line</label>
+            <input type="text" id="line" placeholder="เช่น teacher_udn1">
+            <div class="err-msg">กรุณากรอก ID Line</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 : สังกัด -->
+    <section class="card">
+      <h2><span class="n">2</span> กลุ่มโรงเรียนและโรงเรียน</h2>
+      <div class="body">
+        <div class="grid">
+          <div class="f c6">
+            <label class="req" for="schoolGroup">กลุ่มโรงเรียน</label>
+            <select id="schoolGroup"><option value="">— กำลังโหลด —</option></select>
+            <div class="hint" id="grpHint">มีทั้งหมด 20 กลุ่ม / 214 โรงเรียน</div>
+            <div class="err-msg">กรุณาเลือกกลุ่มโรงเรียน</div>
+          </div>
+          <div class="f c6">
+            <label class="req" for="school">โรงเรียน</label>
+            <select id="school" disabled><option value="">— เลือกกลุ่มโรงเรียนก่อน —</option></select>
+            <div class="hint" id="schHint">&nbsp;</div>
+            <div class="err-msg">กรุณาเลือกโรงเรียน</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 : ผลงาน -->
+    <section class="card">
+      <h2><span class="n">3</span> รายละเอียดผลงานและอินโฟกราฟิก</h2>
+      <div class="body">
+        <div class="grid">
+          <div class="f c12">
+            <label class="req" for="title">ชื่อผลงาน</label>
+            <input type="text" id="title" placeholder="เช่น การจัดการเรียนรู้เศรษฐกิจพอเพียงด้วยฐานการเรียนรู้...">
+            <div class="err-msg">กรุณากรอกชื่อผลงาน</div>
+          </div>
+
+          <div class="f c12">
+            <label class="req" id="lblInfo">อินโฟกราฟิก <span style="font-weight:400;color:var(--muted)">(ไฟล์ PDF, JPG หรือ PNG ไม่เกิน 10 MB)</span></label>
+            <div class="drop" id="dropInfo">
+              <div class="ico">🖼️</div>
+              <div class="t">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
+              <div class="s">รองรับไฟล์ PDF, JPG และ PNG ขนาดไม่เกิน 10 MB</div>
+            </div>
+            <input type="file" id="fileInfo" accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png" hidden>
+            <div class="filebox" id="boxInfo">
+              <img class="thumb" id="thumbInfo" alt="">
+              <span class="fn" id="nameInfo"></span>
+              <span class="fs" id="sizeInfo"></span>
+              <button type="button" data-clear="Info">ลบไฟล์</button>
+            </div>
+            <div class="err-msg" id="errInfo">กรุณาแนบไฟล์อินโฟกราฟิก (PDF, JPG หรือ PNG ไม่เกิน 10 MB)</div>
+          </div>
+
+          <div class="f c12">
+            <label for="note">ข้อมูลเพิ่มเติม (ถ้ามี)</label>
+            <textarea id="note" rows="3" placeholder="สรุปจุดเด่นของผลงานโดยย่อ หรือหมายเหตุอื่น ๆ"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 : ยืนยัน -->
+    <section class="card">
+      <h2><span class="n">4</span> ยืนยันการส่ง</h2>
+      <div class="body">
+        <div class="f" id="wrapConsent">
+          <label class="consent">
+            <input type="checkbox" id="consent">
+            <span>ข้าพเจ้าขอรับรองว่าผลงานที่ส่งเป็นผลงานที่เกิดจากการปฏิบัติงานจริงของข้าพเจ้า
+              มิได้ลอกเลียนผลงานของผู้อื่น และยินยอมให้สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1
+              เผยแพร่ผลงานนี้เพื่อประโยชน์ทางการศึกษา</span>
+          </label>
+          <div class="err-msg">กรุณาติ๊กยืนยันก่อนส่งผลงาน</div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-main" id="btnSend">ส่งผลงาน</button>
+          <button type="button" class="btn btn-ghost" id="btnReset">ล้างข้อมูล</button>
+        </div>
+        <div class="bar" id="bar"><i></i></div>
+        <div class="alert e" id="alert"></div>
+      </div>
+    </section>
+  </form>
+
+  <!-- success -->
+  <section class="card result" id="done">
+    <div class="ico">✅</div>
+    <h3>ส่งผลงานเรียบร้อยแล้ว</h3>
+    <div class="ref" id="refCode">—</div>
+    <p>ระบบได้บันทึกผลงานของท่านเรียบร้อยแล้ว กรุณาบันทึกรหัสอ้างอิงข้างต้นไว้เพื่อใช้ติดตามผล</p>
+    <div class="actions" style="justify-content:center">
+      <button type="button" class="btn btn-ghost" onclick="location.reload()">ส่งผลงานรายการใหม่</button>
+    </div>
+  </section>
+
+  <!-- รายการผลงานที่ส่งเข้ามาแล้ว -->
+  <section class="card" id="secList">
+    <h2><span class="n">📋</span> ผลงานเศรษฐกิจพอเพียงที่ส่งเข้ามาแล้ว</h2>
+    <div class="body">
+      <div class="listbar">
+        <input type="text" id="plq" placeholder="🔍 ค้นหา ชื่อ-สกุล / โรงเรียน / ชื่อผลงาน / รหัสอ้างอิง">
+        <button type="button" class="btn btn-ghost btn-sm" id="plReload">รีเฟรช</button>
+        <span class="cnt" id="plCount">กำลังโหลด…</span>
+      </div>
+      <div class="tw">
+        <table class="pl">
+          <thead><tr>
+            <th>ที่</th><th>รหัสอ้างอิง</th><th>วันที่ส่ง</th>
+            <th>ชื่อ - สกุล</th><th>กลุ่มโรงเรียน</th><th>โรงเรียน</th><th>ชื่อผลงาน</th>
+          </tr></thead>
+          <tbody id="plBody"></tbody>
+        </table>
+        <div class="plempty" id="plEmpty">กำลังโหลดข้อมูล…</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<p class="foot">
+  กลุ่มนิเทศ ติดตาม และประเมินผลการจัดการศึกษา<br>
+  สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1 · 7/7 ถนนโพศรี อำเภอเมืองอุดรธานี 41000<br>
+  โทร. 042-326-030 ต่อ 109 · 0-4222-2041 ต่อ 35 · 09-5659-6444<br>
+  <span style="font-size:12.5px">ข้อมูลโรงเรียน: ระบบ BIG DATA สพป.อุดรธานี เขต 1 ปีการศึกษา 2569 ภาคเรียนที่ 1</span>
+</p>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
+
+/* ---------- โรงเรียน ---------- */
+var SCHOOLS = {};
+const gSel = document.getElementById('schoolGroup');
+const sSel = document.getElementById('school');
+fetch('../schools.json').then(r=>r.json()).then(function(j){
+  SCHOOLS = j;
+  const keys = Object.keys(SCHOOLS);
+  gSel.innerHTML = '<option value="">— เลือกกลุ่มโรงเรียน —</option>';
+  keys.forEach(function(k){ gSel.appendChild(new Option(k,k)); });
+  var n = 0; keys.forEach(function(k){ n += SCHOOLS[k].length; });
+  document.getElementById('grpHint').textContent = 'มีทั้งหมด '+keys.length+' กลุ่ม / '+n+' โรงเรียน';
+}).catch(function(){ gSel.innerHTML = '<option value="">— โหลดรายชื่อโรงเรียนไม่สำเร็จ —</option>'; });
+
+gSel.addEventListener('change', function(){
+  const g = gSel.value, list = SCHOOLS[g] || [];
+  sSel.innerHTML = '<option value="">— เลือกโรงเรียน —</option>';
+  list.forEach(function(x){ sSel.appendChild(new Option(x,x)); });
+  sSel.disabled = !list.length;
+  document.getElementById('schHint').textContent = list.length ? ('มี '+list.length+' โรงเรียนในกลุ่มนี้') : ' ';
+  clearErr(sSel.closest('.f'));
+});
+
+/* ---------- คำนำหน้า อื่น ๆ ---------- */
+const pSel = document.getElementById('prefix'),
+      pOtherWrap = document.getElementById('wrapPrefixOther'),
+      pOther = document.getElementById('prefixOther');
+pSel.addEventListener('change', function(){
+  const on = pSel.value === 'อื่น ๆ';
+  pOtherWrap.style.display = on ? 'flex' : 'none';
+  if (!on) pOther.value = '';
+});
+
+/* ---------- เบอร์โทร ---------- */
+const phone = document.getElementById('phone');
+phone.addEventListener('input', function(){
+  let v = phone.value.replace(/\D/g,'').slice(0,10);
+  if (v.length>6) v = v.slice(0,3)+'-'+v.slice(3,6)+'-'+v.slice(6);
+  else if (v.length>3) v = v.slice(0,3)+'-'+v.slice(3);
+  phone.value = v;
+});
+
+/* ---------- ไฟล์แนบ ---------- */
+const MAXB = 10*1024*1024;
+var pickedInfo = null;
+const isPdf = f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+const PDF_ICON = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23fee2e2'/%3E%3Cpath d='M16 10h11l7 7v21a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3V13a3 3 0 0 1 3-3z' fill='%23fff' stroke='%23ef4444' stroke-width='2'/%3E%3Cpath d='M27 10v7h7' fill='none' stroke='%23ef4444' stroke-width='2'/%3E%3Ctext x='24' y='34' font-family='Arial,Helvetica,sans-serif' font-size='10' font-weight='bold' fill='%23dc2626' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E";
+function fmt(b){ return b<1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(2)+' MB'; }
+
+(function(){
+  const drop=document.getElementById('dropInfo'), input=document.getElementById('fileInfo'),
+        box=document.getElementById('boxInfo'), nm=document.getElementById('nameInfo'),
+        sz=document.getElementById('sizeInfo'), er=document.getElementById('errInfo'),
+        th=document.getElementById('thumbInfo');
+  drop.addEventListener('click',()=>input.click());
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+  drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');
+    if(e.dataTransfer.files.length) take(e.dataTransfer.files[0]);});
+  input.addEventListener('change',()=>{ if(input.files.length) take(input.files[0]); });
+  function reset(){ pickedInfo=null; input.value=''; box.classList.remove('on'); drop.style.display='block'; }
+  function take(f){
+    const ok = /^(image\/(jpeg|png)|application\/pdf)$/.test(f.type) || /\.(jpe?g|png|pdf)$/i.test(f.name);
+    if(!ok){ reset(); er.textContent='รองรับเฉพาะไฟล์ PDF, JPG หรือ PNG เท่านั้น'; drop.closest('.f').classList.add('bad'); return; }
+    if(f.size>MAXB){ reset(); er.textContent='ไฟล์มีขนาด '+fmt(f.size)+' ซึ่งเกิน 10 MB กรุณาลดขนาดไฟล์'; drop.closest('.f').classList.add('bad'); return; }
+    if(f.size===0){ reset(); er.textContent='ไฟล์ว่างเปล่า กรุณาตรวจสอบไฟล์อีกครั้ง'; drop.closest('.f').classList.add('bad'); return; }
+    pickedInfo=f; nm.textContent=f.name; sz.textContent=fmt(f.size);
+    th.src = isPdf(f) ? PDF_ICON : URL.createObjectURL(f);
+    box.classList.add('on'); drop.style.display='none';
+    clearErr(drop.closest('.f'));
+  }
+  document.querySelector('[data-clear="Info"]').addEventListener('click',reset);
+  window.resetInfo = reset;
+})();
+
+/* ---------- ตรวจสอบ ---------- */
+function clearErr(f){ if(f) f.classList.remove('bad'); }
+document.querySelectorAll('input,select,textarea').forEach(function(el){
+  el.addEventListener('input',()=>clearErr(el.closest('.f')));
+  el.addEventListener('change',()=>clearErr(el.closest('.f')));
+});
+function flag(el,bad){ if(el) el.classList.toggle('bad',!!bad); return !bad; }
+function val(id){ return (document.getElementById(id).value||'').trim(); }
+
+function validate(){
+  var ok = true, first = null;
+  function chk(id, cond){
+    const f = document.getElementById(id).closest('.f');
+    if(!flag(f,!cond)){ ok=false; if(!first) first=f; }
+  }
+  chk('prefix', !!val('prefix'));
+  if(val('prefix')==='อื่น ๆ') chk('prefixOther', !!val('prefixOther'));
+  chk('fullname', val('fullname').length>1);
+  chk('position', !!val('position'));
+  chk('academic', !!val('academic'));
+  chk('phone', /^0\d{1,2}-?\d{3}-?\d{4}$/.test(val('phone')));
+  chk('line', !!val('line'));
+  chk('schoolGroup', !!val('schoolGroup'));
+  chk('school', !!val('school'));
+  chk('title', val('title').length>2);
+
+  const iw = document.getElementById('lblInfo').closest('.f');
+  if(!pickedInfo){ document.getElementById('errInfo').textContent='กรุณาแนบไฟล์อินโฟกราฟิก (PDF, JPG หรือ PNG ไม่เกิน 10 MB)'; }
+  if(!flag(iw,!pickedInfo)){ ok=false; if(!first) first=iw; }
+
+  const cw = document.getElementById('wrapConsent');
+  const cOk = document.getElementById('consent').checked;
+  if(!flag(cw,!cOk)){ ok=false; if(!first) first=cw; }
+
+  if(first) first.scrollIntoView({behavior:'smooth',block:'center'});
+  return ok;
+}
+
+/* ---------- ส่งข้อมูล ---------- */
+const frm=document.getElementById('frm'), btn=document.getElementById('btnSend'),
+      bar=document.getElementById('bar'), barI=bar.querySelector('i'),
+      alertEl=document.getElementById('alert');
+
+function toBase64(file){
+  return new Promise(function(ok,no){
+    const r=new FileReader();
+    r.onload=()=>ok(String(r.result).split(',')[1]);
+    r.onerror=()=>no(new Error('อ่านไฟล์ไม่สำเร็จ'));
+    r.readAsDataURL(file);
+  });
+}
+function fail(msg){
+  alertEl.textContent='⚠️ '+msg; alertEl.classList.add('on');
+  btn.disabled=false; btn.textContent='ส่งผลงาน';
+  bar.classList.remove('on'); barI.style.width='0';
+  alertEl.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+frm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  alertEl.classList.remove('on');
+  if(!validate()) return;
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังส่ง...';
+  bar.classList.add('on'); barI.style.width='15%';
+  try{
+    const infoB64 = await toBase64(pickedInfo);
+    barI.style.width='55%';
+    const prefix = val('prefix')==='อื่น ๆ' ? val('prefixOther') : val('prefix');
+    const payload = {
+      action:'submit', form:'sep',
+      prefix: prefix, fullname: val('fullname'),
+      position: val('position'), academic: val('academic'),
+      schoolGroup: val('schoolGroup'), school: val('school'),
+      phone: val('phone'), lineId: val('line'),
+      title: val('title'), note: val('note'),
+      infoName: pickedInfo.name, infoData: infoB64,
+      infoMime: pickedInfo.type || (isPdf(pickedInfo) ? 'application/pdf' : 'image/jpeg')
+    };
+    const res = await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    });
+    barI.style.width='90%';
+    const out = await res.json();
+    if(out && out.ok){
+      barI.style.width='100%';
+      document.getElementById('refCode').textContent = out.refCode || '-';
+      frm.style.display='none';
+      document.getElementById('done').classList.add('on');
+      window.scrollTo({top:0,behavior:'smooth'});
+      plLoad();
+    }else{
+      fail((out && out.message) ? out.message : 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+    }
+  }catch(err){
+    fail('เกิดข้อผิดพลาดในการเชื่อมต่อ: '+err.message+' — กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่');
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click',()=>setTimeout(function(){
+  window.resetInfo();
+  sSel.disabled=true; sSel.innerHTML='<option value="">— เลือกกลุ่มโรงเรียนก่อน —</option>';
+  pOtherWrap.style.display='none'; document.getElementById('schHint').innerHTML='&nbsp;';
+  document.querySelectorAll('.bad').forEach(f=>f.classList.remove('bad'));
+  alertEl.classList.remove('on');
+},0));
+
+/* ---------- ตารางผลงานที่ส่งเข้ามาแล้ว ---------- */
+var PLROWS = [];
+function plEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function plDraw(){
+  var q=(document.getElementById('plq').value||'').trim().toLowerCase();
+  var rows = q ? PLROWS.filter(function(r){
+        return [r.refCode,r.name,r.school,r.schoolGroup,r.title].join(' ').toLowerCase().indexOf(q)>-1; })
+      : PLROWS;
+  document.getElementById('plCount').textContent =
+    'ทั้งหมด '+PLROWS.length+' ผลงาน' + (q ? (' · ตรงคำค้น '+rows.length) : '');
+  var em=document.getElementById('plEmpty');
+  em.style.display = rows.length ? 'none' : 'block';
+  em.textContent = PLROWS.length ? 'ไม่พบผลงานที่ตรงกับคำค้นหา' : 'ยังไม่มีผลงานส่งเข้ามา';
+  document.getElementById('plBody').innerHTML = rows.map(function(r){
+    return '<tr><td class="nw">'+plEsc(r.seq)+'</td>'+
+      '<td class="nw rc">'+plEsc(r.refCode)+'</td>'+
+      '<td class="nw">'+plEsc(r.date)+'</td>'+
+      '<td class="nw">'+plEsc(r.name)+'</td>'+
+      '<td class="nw">'+plEsc(r.schoolGroup)+'</td>'+
+      '<td class="nw">'+plEsc(r.school)+'</td>'+
+      '<td>'+plEsc(r.title)+'</td></tr>';
+  }).join('');
+}
+function plLoad(){
+  if(!API_URL) return;
+  document.getElementById('plCount').textContent='กำลังโหลด…';
+  var cb='__pl'+Date.now(), sc=document.createElement('script');
+  window[cb]=function(res){
+    try{ delete window[cb]; sc.remove(); }catch(e){}
+    PLROWS = (res && res.ok && res.rows) ? res.rows : [];
+    plDraw();
+  };
+  sc.src = API_URL+'?action=publicSep&callback='+cb+'&t='+Date.now();
+  sc.onerror = function(){ document.getElementById('plCount').textContent='โหลดข้อมูลไม่สำเร็จ กดรีเฟรชอีกครั้ง'; };
+  document.body.appendChild(sc);
+}
+document.getElementById('plq').addEventListener('input', plDraw);
+document.getElementById('plReload').addEventListener('click', plLoad);
+plLoad();
+</script>
+</body>
+</html>
