@@ -595,20 +595,20 @@ input:disabled,select:disabled{background:#f1f5f9;color:var(--muted);cursor:not-
           </div>
 
           <div class="f c12">
-            <label class="req" id="lblInfo">③ อินโฟกราฟิก <span style="font-weight:400;color:var(--muted)">(รูปภาพ JPG หรือ PNG ไม่เกิน 10 MB)</span></label>
+            <label class="req" id="lblInfo">③ อินโฟกราฟิก <span style="font-weight:400;color:var(--muted)">(ไฟล์ PDF, JPG หรือ PNG ไม่เกิน 10 MB)</span></label>
             <div class="drop" id="dropInfo">
               <div class="ico">🖼️</div>
-              <div class="t">คลิกเพื่อเลือกรูป หรือลากรูปมาวางที่นี่</div>
-              <div class="s">รองรับไฟล์ JPG และ PNG ขนาดไม่เกิน 10 MB</div>
+              <div class="t">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
+              <div class="s">รองรับไฟล์ PDF, JPG และ PNG ขนาดไม่เกิน 10 MB</div>
             </div>
-            <input type="file" id="fileInfo" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
+            <input type="file" id="fileInfo" accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png" hidden>
             <div class="filebox" id="boxInfo">
               <img class="thumb" id="thumbInfo" alt="">
               <span class="fn" id="nameInfo"></span>
               <span class="fs" id="sizeInfo"></span>
               <button type="button" data-clear="Info">ลบไฟล์</button>
             </div>
-            <div class="err-msg" id="errInfo">กรุณาแนบไฟล์อินโฟกราฟิก (JPG หรือ PNG ไม่เกิน 10 MB)</div>
+            <div class="err-msg" id="errInfo">กรุณาแนบไฟล์อินโฟกราฟิก (PDF, JPG หรือ PNG ไม่เกิน 10 MB)</div>
           </div>
 
           <div class="f c12">
@@ -764,7 +764,7 @@ function applyType(){
   document.getElementById('secWorkNo').textContent = isT1 ? '5' : '4';
   document.getElementById('secConfirmNo').textContent = isT1 ? '6' : '5';
   lblInfo.innerHTML = (isT1 ? '③ อินโฟกราฟิก' : 'อินโฟกราฟิก') +
-    ' <span style="font-weight:400;color:var(--muted)">(รูปภาพ JPG หรือ PNG ไม่เกิน 10 MB)</span>';
+    ' <span style="font-weight:400;color:var(--muted)">(ไฟล์ PDF, JPG หรือ PNG ไม่เกิน 10 MB)</span>';
   clearErr(document.getElementById('wrapType'));
 }
 
@@ -789,6 +789,8 @@ phone.addEventListener('input',()=>{
 /* ---------- file pickers ---------- */
 const MAXB = 10*1024*1024;
 const picked = {Plan:null, Info:null};
+const isPdf = f => f.type==='application/pdf' || /\.pdf$/i.test(f.name);
+const PDF_ICON = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23fee2e2'/%3E%3Cpath d='M16 10h11l7 7v21a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3V13a3 3 0 0 1 3-3z' fill='%23fff' stroke='%23ef4444' stroke-width='2'/%3E%3Cpath d='M27 10v7h7' fill='none' stroke='%23ef4444' stroke-width='2'/%3E%3Ctext x='24' y='34' font-family='Arial,Helvetica,sans-serif' font-size='10' font-weight='bold' fill='%23dc2626' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E";
 
 function setupPicker(key, accept, okTest, errText){
   const drop=document.getElementById('drop'+key), input=document.getElementById('file'+key),
@@ -808,7 +810,7 @@ function setupPicker(key, accept, okTest, errText){
     if(f.size>MAXB){ reset(); er.textContent='ไฟล์มีขนาด '+fmt(f.size)+' ซึ่งเกิน 10 MB กรุณาลดขนาดไฟล์'; drop.closest('.f').classList.add('bad'); return; }
     if(f.size===0){ reset(); er.textContent='ไฟล์ว่างเปล่า กรุณาตรวจสอบไฟล์อีกครั้ง'; drop.closest('.f').classList.add('bad'); return; }
     picked[key]=f; nm.textContent=f.name; sz.textContent=fmt(f.size);
-    if(th){ th.src=URL.createObjectURL(f); }
+    if(th){ th.src = isPdf(f) ? PDF_ICON : URL.createObjectURL(f); }
     box.classList.add('on'); drop.style.display='none';
     clearErr(drop.closest('.f'));
   }
@@ -818,7 +820,7 @@ function setupPicker(key, accept, okTest, errText){
 const resetPlan = setupPicker('Plan','pdf',
   f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name), 'รองรับเฉพาะไฟล์ PDF เท่านั้น');
 const resetInfo = setupPicker('Info','img',
-  f=>/^image\/(jpeg|png)$/.test(f.type)||/\.(jpe?g|png)$/i.test(f.name), 'รองรับเฉพาะรูปภาพ JPG หรือ PNG เท่านั้น');
+  f=>/^(image\/(jpeg|png)|application\/pdf)$/.test(f.type)||/\.(jpe?g|png|pdf)$/i.test(f.name), 'รองรับเฉพาะไฟล์ PDF, JPG หรือ PNG เท่านั้น');
 
 function fmt(b){ return b<1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(2)+' MB'; }
 
@@ -859,7 +861,7 @@ function validate(){
   }
 
   const iw=document.getElementById('lblInfo').closest('.f');
-  if(!picked.Info){ document.getElementById('errInfo').textContent='กรุณาแนบไฟล์อินโฟกราฟิก (JPG หรือ PNG ไม่เกิน 10 MB)'; }
+  if(!picked.Info){ document.getElementById('errInfo').textContent='กรุณาแนบไฟล์อินโฟกราฟิก (PDF, JPG หรือ PNG ไม่เกิน 10 MB)'; }
   flag(iw, !picked.Info);
 
   const cs=document.getElementById('consent'), wc=document.getElementById('wrapConsent');
@@ -912,7 +914,7 @@ frm.addEventListener('submit', async e=>{
       note:document.getElementById('note').value.trim(),
       planName: picked.Plan?picked.Plan.name:'', planData: planB64,
       infoName: picked.Info.name, infoData: infoB64,
-      infoMime: picked.Info.type || 'image/jpeg'
+      infoMime: picked.Info.type || (isPdf(picked.Info) ? 'application/pdf' : 'image/jpeg')
     };
 
     barI.style.width='68%';
