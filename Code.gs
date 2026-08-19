@@ -39,6 +39,16 @@ const PTYPE_NAME = {
 };
 const PTYPE_CODE = { '1': 'AL', '2': 'ADM', '3': 'LRN' };
 
+/* ---- ผลงานเศรษฐกิจพอเพียง (แท็บชีตแยก + หน้าเว็บ /sep/) ---- */
+const SHEET_SEP = 'เศรษฐกิจพอเพียง';
+const SEP_NAME  = 'การจัดการเรียนรู้เศรษฐกิจพอเพียง';
+const HEADERS_SEP = [
+  'ลำดับ', 'วันที่ส่ง', 'รหัสอ้างอิง', 'ชื่อผลงาน',
+  'คำนำหน้า', 'ชื่อ - สกุล', 'ตำแหน่ง', 'วิทยฐานะ',
+  'กลุ่มโรงเรียน', 'โรงเรียน', 'เบอร์โทรศัพท์', 'ID Line',
+  'ลิงก์อินโฟกราฟิก', 'หมายเหตุ'
+];
+
 /* ---------------------------------------------------------------
  *  doPost — รับการส่งผลงานจาก index.html
  * --------------------------------------------------------------- */
@@ -49,6 +59,8 @@ function doPost(e) {
 
     const d = JSON.parse(e.postData.contents);
     if (d.action !== 'submit') return json({ ok: false, message: 'คำสั่งไม่ถูกต้อง' });
+
+    if (String(d.form || '') === 'sep') return submitSep(d);
 
     const t = String(d.ptype || '');
     if (!PTYPE_NAME[t]) return json({ ok: false, message: 'กรุณาเลือกประเภทผลงาน' });
@@ -148,10 +160,12 @@ function doGet(e) {
 
   var out;
   if (p.action === 'list') {
-    out = (p.token === ADMIN_PASS) ? { ok: true, rows: readAll() }
+    out = (p.token === ADMIN_PASS) ? { ok: true, rows: readAll().concat(readSep()) }
                                    : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else if (p.action === 'public') {
     out = { ok: true, rows: readPublic() };
+  } else if (p.action === 'publicSep') {
+    out = { ok: true, rows: readPublicSep() };
   } else {
     out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
   }
@@ -212,6 +226,114 @@ function readPublic() {
       name: (r[6] || '') + r[7],
       schoolGroup: r[10],
       school: r[11]
+    });
+  }
+  return out.reverse();
+}
+
+/* ===============================================================
+ *  ผลงานเศรษฐกิจพอเพียง — บันทึกลงแท็บชีตแยก
+ * =============================================================== */
+function submitSep(d) {
+  var need = ['prefix','fullname','position','academic','schoolGroup','school',
+              'phone','lineId','title','infoData','infoName'];
+  for (var i = 0; i < need.length; i++) {
+    if (!d[need[i]] || String(d[need[i]]).trim() === '') {
+      return json({ ok: false, message: 'ข้อมูลไม่ครบถ้วน (' + need[i] + ')' });
+    }
+  }
+  if (!/^0\d{1,2}-?\d{3}-?\d{4}$/.test(String(d.phone).replace(/\s/g, ''))) {
+    return json({ ok: false, message: 'เบอร์โทรศัพท์ไม่ถูกต้อง' });
+  }
+  if (!/\.(jpe?g|png|pdf)$/i.test(String(d.infoName))) {
+    return json({ ok: false, message: 'อินโฟกราฟิกต้องเป็นไฟล์ PDF, JPG หรือ PNG เท่านั้น' });
+  }
+
+  const sh  = getSepSheet();
+  const seq = Math.max(0, sh.getLastRow() - 1) + 1;
+  const now = new Date();
+  const y   = (now.getFullYear() + 543).toString().slice(-2);
+  const refCode = 'SEP' + y + '-' + ('0000' + seq).slice(-4);
+
+  const bytes = Utilities.base64Decode(d.infoData);
+  if (bytes.length > MAX_BYTES) return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกมีขนาดเกิน 10 MB' });
+  const isPng = (bytes[0] === -119 || bytes[0] === 137);
+  const isJpg = (bytes[0] === -1  || bytes[0] === 255);
+  const isPdf = (bytes[0] === 37 && bytes[1] === 80 && bytes[2] === 68 && bytes[3] === 70);
+  if (!isPng && !isJpg && !isPdf) {
+    return json({ ok: false, message: 'ไฟล์อินโฟกราฟิกต้องเป็น PDF, JPG หรือ PNG เท่านั้น' });
+  }
+  const ext  = isPdf ? '.pdf' : (isPng ? '.png' : '.jpg');
+  const mime = isPdf ? 'application/pdf' : (isPng ? 'image/png' : 'image/jpeg');
+  const file = saveFile(getFolder(), bytes, mime,
+    refCode + '__INFO__' + safe(d.school) + ext, SEP_NAME, d.school);
+
+  sh.appendRow([
+    seq,
+    Utilities.formatDate(now, 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss'),
+    refCode,
+    d.title,
+    d.prefix, d.fullname, d.position, d.academic,
+    d.schoolGroup, d.school, d.phone, d.lineId,
+    file.getUrl(), d.note || ''
+  ]);
+  return json({ ok: true, refCode: refCode });
+}
+
+function getSepSheet() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(SHEET_SEP);
+  if (!sh) sh = ss.insertSheet(SHEET_SEP);
+  const need = (sh.getLastRow() === 0) ||
+               (sh.getRange(1, 1, 1, HEADERS_SEP.length).getDisplayValues()[0][3] !== HEADERS_SEP[3]);
+  if (need) {
+    sh.getRange(1, 1, 1, HEADERS_SEP.length).setValues([HEADERS_SEP])
+      .setFontWeight('bold').setBackground('#0d9488').setFontColor('#ffffff')
+      .setVerticalAlignment('middle').setHorizontalAlignment('center').setWrap(true);
+    sh.setFrozenRows(1);
+    sh.setRowHeight(1, 42);
+    [55, 155, 110, 320, 90, 190, 170, 150, 250, 230, 140, 140, 220, 260]
+      .forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
+  }
+  return sh;
+}
+
+/* แปลงเป็นรูปแบบเดียวกับ readAll() เพื่อให้หน้า admin แสดงรวมกันได้ */
+function readSep() {
+  const sh = getSepSheet();
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  const v = sh.getRange(2, 1, last - 1, HEADERS_SEP.length).getDisplayValues();
+  return v.map(function (r) {
+    return {
+      seq: r[0], timestamp: r[1], refCode: r[2], ptype: SEP_NAME, subject: '', title: r[3],
+      prefix: r[4], fullname: r[5], name: (r[4] || '') + r[5],
+      position: r[6], academic: r[7], schoolGroup: r[8], school: r[9], level: '',
+      phone: r[10], lineId: r[11], planUrl: '', infoUrl: r[12], videoUrl: '', note: r[13]
+    };
+  }).reverse();
+}
+
+function readPublicSep() {
+  const sh = getSepSheet();
+  const last = sh.getLastRow();
+  if (last < 2) return [];
+  const v = sh.getRange(2, 1, last - 1, HEADERS_SEP.length).getDisplayValues();
+  const out = [];
+  for (var i = 0; i < v.length; i++) {
+    var r = v[i];
+    var title = String(r[3] || '');
+    if (/^TEST[-\s]/i.test(title)) continue;
+    out.push({
+      seq: r[0],
+      date: String(r[1] || '').split(' ')[0],
+      refCode: r[2],
+      ptype: SEP_NAME,
+      subject: '',
+      title: title,
+      name: (r[4] || '') + r[5],
+      schoolGroup: r[8],
+      school: r[9]
     });
   }
   return out.reverse();
