@@ -8,6 +8,74 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
+<style>
+/* ================= โทนสีเขียวมรกต — เฉพาะหน้าเศรษฐกิจพอเพียง ================= */
+:root{
+  --brand:#059669; --brand-2:#10b981; --brand-dk:#065f46; --brand-lt:#ecfdf5;
+  --c1:#059669; --c1-d:#047857; --c1-l:#ecfdf5; --c1-b:#a7f3d0;
+  --c2:#0d9488; --c2-d:#0f766e; --c2-l:#f0fdfa; --c2-b:#99f6e4;
+  --c3:#65a30d; --c3-d:#4d7c0f; --c3-l:#f7fee7; --c3-b:#d9f99d;
+  --c4:#0d9488; --c5:#16a34a; --c6:#0891b2;
+  --accent:#f59e0b; --accent-dk:#b45309;
+  --ok:#059669; --err:#e11d48;
+  --bg:#f3fbf7;
+  --sh-2:0 1px 2px rgba(15,23,42,.05), 0 12px 28px -14px rgba(5,150,105,.32);
+  --sh-3:0 2px 6px rgba(15,23,42,.06), 0 26px 50px -24px rgba(5,150,105,.45);
+  --ring:0 0 0 4px rgba(5,150,105,.18);
+}
+body{
+  background:
+    radial-gradient(760px 460px at 92% -6%, rgba(16,185,129,.20), transparent 62%),
+    radial-gradient(680px 420px at 4% 8%, rgba(13,148,136,.18), transparent 60%),
+    radial-gradient(700px 480px at 76% 44%, rgba(132,204,22,.13), transparent 62%),
+    radial-gradient(620px 420px at 12% 82%, rgba(245,158,11,.10), transparent 62%),
+    var(--bg);
+  background-attachment:fixed;
+}
+::selection{background:rgba(16,185,129,.24)}
+.topbar{
+  background:linear-gradient(120deg,#065f46 0%,#059669 38%,#10b981 66%,#0891b2 100%);
+  box-shadow:0 20px 48px -26px rgba(5,150,105,.85);
+}
+.badge{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#3f2d00}
+.notice{background:linear-gradient(135deg,#f0fdf6,#fff 55%);border-color:#bbf0d5}
+.notice::before{background:linear-gradient(180deg,#34d399,#0d9488)}
+.notice li::marker{color:var(--c2)}
+.card:nth-of-type(1) > h2{background:linear-gradient(180deg,#ecfdf5,#fff)}
+.card:nth-of-type(1) > h2::before{background:linear-gradient(90deg,#34d399,#059669)}
+.card:nth-of-type(1) > h2 .n{background:linear-gradient(140deg,#34d399,#059669);box-shadow:0 8px 16px -8px rgba(5,150,105,.9)}
+.card:nth-of-type(2) > h2{background:linear-gradient(180deg,#f0fdfa,#fff)}
+.card:nth-of-type(2) > h2::before{background:linear-gradient(90deg,#2dd4bf,#0d9488)}
+.card:nth-of-type(2) > h2 .n{background:linear-gradient(140deg,#2dd4bf,#0d9488);box-shadow:0 8px 16px -8px rgba(13,148,136,.9)}
+.card:nth-of-type(3) > h2{background:linear-gradient(180deg,#f7fee7,#fff)}
+.card:nth-of-type(3) > h2::before{background:linear-gradient(90deg,#a3e635,#65a30d)}
+.card:nth-of-type(3) > h2 .n{background:linear-gradient(140deg,#a3e635,#65a30d);box-shadow:0 8px 16px -8px rgba(101,163,13,.9)}
+.card:nth-of-type(4) > h2{background:linear-gradient(180deg,#ecfeff,#fff)}
+.card:nth-of-type(4) > h2::before{background:linear-gradient(90deg,#22d3ee,#0891b2)}
+.card:nth-of-type(4) > h2 .n{background:linear-gradient(140deg,#22d3ee,#0891b2);box-shadow:0 8px 16px -8px rgba(8,145,178,.9)}
+.drop:hover,.drop.over{border-color:var(--c1);background:linear-gradient(180deg,#ecfdf5,#d1fae5)}
+.btn-main{
+  background:linear-gradient(135deg,#10b981 0%,#059669 45%,#0d9488 100%);
+  box-shadow:0 14px 30px -14px rgba(5,150,105,1), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.btn-main:hover:not(:disabled){box-shadow:0 20px 38px -16px rgba(5,150,105,1), inset 0 1px 0 rgba(255,255,255,.3)}
+.btn-ghost:hover{border-color:#a7d9c2}
+.bar{background:#dcf3e8}
+.bar i{background:linear-gradient(90deg,#a3e635,#10b981 50%,#0d9488);box-shadow:0 0 14px rgba(16,185,129,.75)}
+.result h3{background:linear-gradient(135deg,#059669,#0891b2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.result .ref{background:linear-gradient(135deg,#ecfdf5,#f0fdfa)}
+table.pl th{background:linear-gradient(180deg,#e9fbf2,#dcf7ea);color:var(--brand-dk);border-bottom-color:#a7f3d0}
+table.pl tbody tr:nth-child(even){background:#f8fdfa}
+table.pl tbody tr:hover{background:linear-gradient(90deg,#ecfdf5,#f0fdfa)}
+.card:nth-of-type(5) > h2{background:linear-gradient(180deg,#ecfdf5,#fff)}
+.card:nth-of-type(5) > h2::before{background:linear-gradient(90deg,#6ee7b7,#059669)}
+.card:nth-of-type(5) > h2 .n{background:linear-gradient(140deg,#6ee7b7,#059669);box-shadow:0 8px 16px -8px rgba(5,150,105,.9)}
+.card:nth-of-type(6) > h2{background:linear-gradient(180deg,#f0fdfa,#fff)}
+.card:nth-of-type(6) > h2::before{background:linear-gradient(90deg,#5eead4,#0f766e)}
+.card:nth-of-type(6) > h2 .n{background:linear-gradient(140deg,#5eead4,#0f766e);box-shadow:0 8px 16px -8px rgba(15,118,110,.9)}
+.consent{background:linear-gradient(135deg,#ecfdf5,#f8fafc 60%);border-color:#a7f3d0}
+.consent input{accent-color:var(--c1)}
+</style>
 </head>
 <body>
 
