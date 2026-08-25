@@ -49,6 +49,16 @@ const HEADERS_SEP = [
   'ลิงก์อินโฟกราฟิก', 'หมายเหตุ'
 ];
 
+/* ---- สวิตช์เปิด/ปิดระบบรับผลงาน (ควบคุมจากหน้า admin) ---- */
+const CLOSED_MSG = 'ขณะนี้ปิดรับผลงานแล้ว ขออภัยในความไม่สะดวก';
+function isOpen() {
+  return PropertiesService.getScriptProperties().getProperty('SUBMIT_OPEN') !== 'OFF';
+}
+function setOpen(on) {
+  PropertiesService.getScriptProperties().setProperty('SUBMIT_OPEN', on ? 'ON' : 'OFF');
+  return isOpen();
+}
+
 /* ---------------------------------------------------------------
  *  doPost — รับการส่งผลงานจาก index.html
  * --------------------------------------------------------------- */
@@ -59,6 +69,7 @@ function doPost(e) {
 
     const d = JSON.parse(e.postData.contents);
     if (d.action !== 'submit') return json({ ok: false, message: 'คำสั่งไม่ถูกต้อง' });
+    if (!isOpen()) return json({ ok: false, message: CLOSED_MSG });
 
     if (String(d.form || '') === 'sep') return submitSep(d);
 
@@ -166,6 +177,12 @@ function doGet(e) {
     out = { ok: true, rows: readPublic() };
   } else if (p.action === 'publicSep') {
     out = { ok: true, rows: readPublicSep() };
+  } else if (p.action === 'status') {
+    out = { ok: true, open: isOpen(), closedMsg: CLOSED_MSG };
+  } else if (p.action === 'setOpen') {
+    out = (p.token === ADMIN_PASS)
+      ? { ok: true, open: setOpen(String(p.open) === '1' || String(p.open) === 'true') }
+      : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else {
     out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
   }
