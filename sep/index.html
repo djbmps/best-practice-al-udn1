@@ -517,6 +517,40 @@ function plLoad(){
 document.getElementById('plq').addEventListener('input', plDraw);
 document.getElementById('plReload').addEventListener('click', plLoad);
 plLoad();
+
+/* ---------- สถานะเปิด/ปิดรับผลงาน (ควบคุมจากหน้า admin) ---------- */
+function stClosed(msg){
+  var f = document.getElementById('frm');
+  if (f) f.style.display = 'none';
+  var d = document.getElementById('done');
+  if (d) d.style.display = 'none';
+  if (document.getElementById('closedBox')) return;
+  var box = document.createElement('section');
+  box.id = 'closedBox';
+  box.style.cssText = 'background:linear-gradient(135deg,#fff1f2,#fff 62%);border:1px solid #fecdd3;'
+    + 'border-radius:22px;padding:40px 26px;margin-bottom:20px;text-align:center;'
+    + 'box-shadow:0 1px 2px rgba(15,23,42,.05),0 12px 28px -14px rgba(225,29,72,.32)';
+  box.innerHTML = '<div style="font-size:54px;line-height:1">🔒</div>'
+    + '<h3 style="margin:12px 0 6px;font-size:23px;font-weight:800;color:#9f1239;letter-spacing:-.4px">ปิดรับผลงานแล้ว</h3>'
+    + '<p style="margin:0 auto;max-width:560px;color:#64748b;font-size:15.5px">'
+    + plEsc(msg || 'ขณะนี้ปิดรับผลงานแล้ว ขออภัยในความไม่สะดวก') + '</p>'
+    + '<p style="margin:8px auto 0;max-width:560px;color:#94a3b8;font-size:14px">ท่านยังสามารถตรวจสอบรายชื่อผลงานที่ส่งเข้ามาแล้วได้จากตารางด้านล่าง</p>';
+  var anchor = document.querySelector('.notice');
+  if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor.nextSibling);
+  else document.querySelector('.page').insertBefore(box, document.querySelector('.page').firstChild);
+}
+function stLoad(){
+  if (!API_URL) return;
+  var cb = '__st' + Date.now(), sc = document.createElement('script');
+  window[cb] = function(res){
+    try { delete window[cb]; sc.remove(); } catch(e){}
+    if (res && res.ok && res.open === false) stClosed(res.closedMsg);
+  };
+  sc.onerror = function(){ try { delete window[cb]; sc.remove(); } catch(e){} };
+  sc.src = API_URL + '?action=status&callback=' + cb + '&t=' + Date.now();
+  document.body.appendChild(sc);
+}
+stLoad();
 </script>
 </body>
 </html>
