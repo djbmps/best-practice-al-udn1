@@ -204,6 +204,7 @@ td.wrap{white-space:normal;min-width:230px;max-width:340px}
         <div class="fl" style="display:flex;gap:8px">
           <button class="btn btn-main btn-sm" id="reload">รีเฟรช</button>
           <button class="btn btn-ghost btn-sm" id="csv">ส่งออก CSV</button>
+          <button class="btn btn-ghost btn-sm" id="toggleOpen" style="display:none">—</button>
         </div>
       </div>
     </div>
@@ -274,12 +275,52 @@ async function doLogin(){
       TOKEN=pw; sessionStorage.setItem('bpal_t',pw);
       gate.style.display='none'; app.style.display='block';
       render(out.rows||[]);
+      loadStatus();
     }else{
       gErr.textContent = out.message||'รหัสผ่านไม่ถูกต้อง'; gErr.classList.add('on');
     }
   }catch(e){ gErr.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; gErr.classList.add('on'); }
   b.disabled=false; b.textContent='เข้าสู่ระบบ';
 }
+
+/* ---------- เปิด / ปิด ระบบรับผลงาน ---------- */
+let SYS_OPEN = true;
+const btnOpen = document.getElementById('toggleOpen');
+
+function paintStatus(){
+  btnOpen.style.display='';
+  if(SYS_OPEN){
+    btnOpen.textContent='🔒 ปิดรับผลงาน';
+    btnOpen.style.cssText='background:linear-gradient(135deg,#fff1f2,#ffe4e6);border:1.5px solid #fda4af;color:#9f1239;font-weight:700';
+  }else{
+    btnOpen.textContent='🔓 เปิดรับผลงาน';
+    btnOpen.style.cssText='background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #6ee7b7;color:#065f46;font-weight:700';
+  }
+  const h=document.querySelector('.card .bar h2');
+  if(h){
+    let tag=document.getElementById('sysTag');
+    if(!tag){ tag=document.createElement('span'); tag.id='sysTag'; tag.style.cssText='margin-left:10px;font-size:13px;padding:3px 12px;border-radius:99px;font-weight:700;vertical-align:middle'; h.appendChild(tag); }
+    tag.textContent = SYS_OPEN ? 'เปิดรับผลงานอยู่' : 'ปิดรับผลงานแล้ว';
+    tag.style.background = SYS_OPEN ? '#ecfdf5' : '#fff1f2';
+    tag.style.color      = SYS_OPEN ? '#047857' : '#9f1239';
+  }
+}
+async function loadStatus(){
+  try{ const r=await call({action:'status'}); if(r&&r.ok){ SYS_OPEN = r.open!==false; paintStatus(); } }catch(e){}
+}
+btnOpen.addEventListener('click', async ()=>{
+  const next = !SYS_OPEN;
+  const msg = next ? 'ยืนยันการเปิดรับผลงานอีกครั้ง?'
+                   : 'ยืนยันการปิดรับผลงาน?\n\nครูจะไม่สามารถส่งผลงานใหม่ได้ทั้งหน้าหลักและหน้าเศรษฐกิจพอเพียง\nข้อมูลเดิมยังอยู่ครบ และเปิดใหม่ได้ทุกเมื่อ';
+  if(!confirm(msg)) return;
+  btnOpen.disabled=true; const old=btnOpen.textContent; btnOpen.textContent='กำลังบันทึก...';
+  try{
+    const r=await call({action:'setOpen', token:TOKEN, open: next?'1':'0'});
+    if(r&&r.ok){ SYS_OPEN = r.open!==false; paintStatus(); }
+    else{ alert(r&&r.message||'บันทึกไม่สำเร็จ'); btnOpen.textContent=old; }
+  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); btnOpen.textContent=old; }
+  btnOpen.disabled=false;
+});
 
 /* JSONP — เลี่ยงปัญหา CORS ของ Apps Script */
 function call(params){
