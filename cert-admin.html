@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการเกียรติบัตร | สพป.อุดรธานี เขต 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --brand:#1d4ed8; --brand-2:#3b82f6; --brand-dk:#1e3a8a; --brand-lt:#eff6ff;
+  --c1:#2563eb; --c2:#0d9488; --c3:#ea580c; --c4:#7c3aed; --c5:#db2777; --c6:#0891b2;
+  --accent:#f59e0b; --ok:#0d9488; --err:#e11d48;
+  --ink:#0f172a; --ink-2:#334155; --muted:#64748b; --line:#e2e8f0; --line-2:#f1f5f9;
+  --bg:#f6f8fd;
+  --sh-1:0 1px 2px rgba(15,23,42,.05);
+  --sh-2:0 1px 2px rgba(15,23,42,.05), 0 12px 28px -14px rgba(30,58,138,.30);
+  --sh-3:0 2px 6px rgba(15,23,42,.06), 0 26px 50px -24px rgba(30,58,138,.42);
+  --ring:0 0 0 4px rgba(37,99,235,.16);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:'Sarabun',system-ui,-apple-system,sans-serif;color:var(--ink);font-size:15.5px;letter-spacing:-.1px;
+  background:
+    radial-gradient(700px 420px at 94% -6%, rgba(124,58,237,.15), transparent 62%),
+    radial-gradient(620px 400px at 2% 8%, rgba(8,145,178,.15), transparent 60%),
+    radial-gradient(560px 380px at 60% 96%, rgba(245,158,11,.10), transparent 62%),
+    var(--bg);
+  background-attachment:fixed;
+}
+.topbar{
+  position:relative;overflow:hidden;color:#fff;padding:24px 20px 30px;
+  background:linear-gradient(120deg,#1e3a8a 0%,#2563eb 38%,#4f46e5 68%,#0891b2 100%);
+  border-radius:0 0 28px 28px;box-shadow:0 18px 42px -24px rgba(37,99,235,.85)
+}
+.topbar::before{
+  content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+  background:
+    radial-gradient(460px 240px at 88% 2%, rgba(56,189,248,.5), transparent 62%),
+    radial-gradient(380px 220px at 10% 108%, rgba(245,158,11,.4), transparent 64%)
+}
+.topbar .wrap{position:relative;z-index:1;max-width:1340px;margin:0 auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.crest{
+  width:66px;height:66px;flex:none;object-fit:contain;display:block;
+  filter:drop-shadow(0 2px 0 rgba(255,255,255,.5)) drop-shadow(0 8px 16px rgba(0,0,0,.45))
+}
+.topbar h1{margin:0;font-size:21px;font-weight:700;letter-spacing:-.4px;text-shadow:0 2px 14px rgba(0,0,0,.2)}
+.topbar p{margin:3px 0 0;font-size:14px;opacity:.92}
+.page{max-width:1340px;margin:22px auto 56px;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh-2);margin-bottom:18px;overflow:hidden}
+.card .body{padding:18px}
+
+/* gate */
+.gate{max-width:440px;margin:70px auto;text-align:center;animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+.gate .body{padding:36px 30px}
+.gate h2{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:-.4px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gate p{margin:0 0 20px;color:var(--muted);font-size:14.5px}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+input,select,button{font-family:inherit;font-size:15px}
+input[type=text],input[type=password],select{
+  padding:11px 14px;border:1.5px solid var(--line);border-radius:14px;width:100%;background:#f8fafc;
+  transition:border-color .15s,box-shadow .15s,background .15s
+}
+select{
+  cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:38px;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center
+}
+input:hover,select:hover{border-color:#c7d7ef}
+input:focus,select:focus{outline:none;border-color:var(--c1);background:#fff;box-shadow:var(--ring)}
+.btn{
+  padding:12px 24px;border-radius:14px;border:none;cursor:pointer;font-weight:700;letter-spacing:-.15px;
+  transition:transform .16s cubic-bezier(.2,.7,.3,1),box-shadow .16s,background-position .5s
+}
+.btn-main{
+  color:#fff;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 45%,#7c3aed 100%);
+  background-size:180% 180%;background-position:0% 50%;
+  box-shadow:0 12px 26px -14px rgba(37,99,235,1), inset 0 1px 0 rgba(255,255,255,.3)
+}
+.btn-main:hover{transform:translateY(-2px);background-position:100% 50%;box-shadow:0 18px 34px -16px rgba(37,99,235,1), inset 0 1px 0 rgba(255,255,255,.3)}
+.btn-main:active{transform:translateY(0)}
+.btn-sm{padding:9px 16px;font-size:14px;border-radius:12px}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink-2)}
+.btn-ghost:hover{border-color:#c7d7ef;transform:translateY(-2px);box-shadow:var(--sh-1)}
+.btn:focus-visible{outline:none;box-shadow:var(--ring)}
+
+/* stats — การ์ดคนละสี */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin-bottom:18px}
+.stat{
+  position:relative;overflow:hidden;background:#fff;border:1.5px solid var(--line);border-radius:20px;
+  padding:17px 19px;box-shadow:var(--sh-2);transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .18s
+}
+.stat::before{content:"";position:absolute;left:0;right:0;top:0;height:5px}
+.stat:hover{transform:translateY(-4px);box-shadow:var(--sh-3)}
+.stat .k{font-size:13px;color:var(--muted);font-weight:600}
+.stat .v{font-size:30px;font-weight:800;line-height:1.25;letter-spacing:-.8px;
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.stat:nth-child(6n+1){background:linear-gradient(170deg,#eff6ff,#fff 62%);border-color:#bfdbfe}
+.stat:nth-child(6n+1)::before{background:linear-gradient(90deg,#60a5fa,#2563eb)}
+.stat:nth-child(6n+1) .v{background-image:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.stat:nth-child(6n+2){background:linear-gradient(170deg,#f0fdfa,#fff 62%);border-color:#a7f3e4}
+.stat:nth-child(6n+2)::before{background:linear-gradient(90deg,#34d399,#0d9488)}
+.stat:nth-child(6n+2) .v{background-image:linear-gradient(135deg,#10b981,#0f766e)}
+.stat:nth-child(6n+3){background:linear-gradient(170deg,#f5f3ff,#fff 62%);border-color:#ddd6fe}
+.stat:nth-child(6n+3)::before{background:linear-gradient(90deg,#a78bfa,#7c3aed)}
+.stat:nth-child(6n+3) .v{background-image:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+.stat:nth-child(6n+4){background:linear-gradient(170deg,#fff7ed,#fff 62%);border-color:#fed7aa}
+.stat:nth-child(6n+4)::before{background:linear-gradient(90deg,#fb923c,#ea580c)}
+.stat:nth-child(6n+4) .v{background-image:linear-gradient(135deg,#f97316,#c2410c)}
+.stat:nth-child(6n+5){background:linear-gradient(170deg,#fdf2f8,#fff 62%);border-color:#fbcfe8}
+.stat:nth-child(6n+5)::before{background:linear-gradient(90deg,#f472b6,#db2777)}
+.stat:nth-child(6n+5) .v{background-image:linear-gradient(135deg,#ec4899,#be185d)}
+.stat:nth-child(6n+6){background:linear-gradient(170deg,#ecfeff,#fff 62%);border-color:#a5f3fc}
+.stat:nth-child(6n+6)::before{background:linear-gradient(90deg,#22d3ee,#0891b2)}
+.stat:nth-child(6n+6) .v{background-image:linear-gradient(135deg,#06b6d4,#0e7490)}
+
+/* filters */
+.filters{display:grid;grid-template-columns:1.8fr 1.5fr 1.3fr 1.3fr .9fr auto;gap:11px;align-items:end}
+@media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+.fl label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:700}
+
+/* table */
+.tablewrap{overflow:auto;max-height:66vh;border-top:1px solid var(--line-2)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:14.2px;white-space:nowrap}
+th,td{padding:11px 13px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+th{
+  background:linear-gradient(180deg,#eef4ff,#e0eaff);color:var(--brand-dk);font-weight:700;
+  position:sticky;top:0;z-index:2;cursor:pointer;user-select:none;font-size:13.5px;
+  border-bottom:2px solid #c7d7f7;transition:background .15s
+}
+th:hover{background:linear-gradient(180deg,#e0eaff,#d3e0fd)}
+th .ar{opacity:.5;font-size:11px}
+tbody tr{transition:background .12s,box-shadow .12s}
+tbody tr:nth-child(even){background:#fafbff}
+tbody tr:hover{background:linear-gradient(90deg,#eff6ff,#f5f3ff)}
+td.wrap{white-space:normal;min-width:230px;max-width:340px}
+.pill{
+  display:inline-block;padding:3px 13px;border-radius:99px;font-size:12.5px;font-weight:700;white-space:nowrap;
+  background:linear-gradient(135deg,#dbeafe,#eff6ff);color:#1d4ed8;border:1px solid #bfdbfe
+}
+.pill.suf{background:linear-gradient(135deg,#fef3c7,#fffbeb);color:#b45309;border-color:#fde68a}
+.lnk{color:var(--c1);text-decoration:none;font-weight:700;text-underline-offset:3px}
+.lnk:hover{text-decoration:underline}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--muted)}
+.empty{padding:56px;text-align:center;color:var(--muted)}
+.alert{margin:0 0 14px;padding:14px 18px;border-radius:16px;font-weight:600;
+  background:linear-gradient(135deg,#fff1f4,#ffe4e9);border:1px solid #fda4af;color:#9f1239;display:none}
+.alert.on{display:block}
+.bar{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 19px;
+  background:linear-gradient(120deg,#eff6ff,#f5f3ff 60%,#fff);border-bottom:1px solid var(--line-2);flex-wrap:wrap
+}
+.bar h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.3px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent}
+.spin{width:15px;height:15px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
+  display:inline-block;vertical-align:-2px;margin-right:8px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#app{display:none}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+
+
+/* ---------- จัดการกิจกรรม ---------- */
+.acts{display:grid;gap:14px}
+.act{
+  border:1.5px solid var(--line);border-radius:20px;background:#fff;overflow:hidden;
+  box-shadow:var(--sh-1);transition:box-shadow .18s,transform .18s
+}
+.act:hover{box-shadow:var(--sh-2);transform:translateY(-2px)}
+.act > .h{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding:16px 18px;background:linear-gradient(170deg,#f5f3ff,#fff 70%)}
+.act .nm{font-size:17.5px;font-weight:800;letter-spacing:-.35px}
+.act .cd{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--muted)}
+.act .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:13px}
+.act .meta span{background:var(--line-2);padding:4px 11px;border-radius:99px;font-weight:600;color:var(--ink-2)}
+.act .acts-r{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:99px;font-size:13px;font-weight:700;border:1.5px solid}
+.pill.live{background:#ecfdf5;color:#047857;border-color:#6ee7b7}
+.pill.wait{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.pill.off{background:#f8fafc;color:#64748b;border-color:#e2e8f0}
+.act > .b{padding:16px 18px;border-top:1px solid var(--line-2);display:none}
+.act.open > .b{display:block}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.fl label{display:block;font-size:13.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+textarea{
+  font-family:inherit;font-size:14px;width:100%;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:14px;background:#f8fafc;resize:vertical;min-height:150px;line-height:1.55
+}
+textarea:focus{outline:none;border-color:var(--c1);background:#fff;box-shadow:var(--ring)}
+.hint{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.65}
+.tplbox{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tplbox img{width:190px;border-radius:12px;border:1px solid var(--line);display:block;background:#fff}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.sect{margin-top:20px;padding-top:18px;border-top:1px dashed var(--line)}
+.sect > h4{margin:0 0 12px;font-size:15.5px;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:8px}
+.empty2{padding:34px;text-align:center;color:var(--muted)}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <img class="crest" src="logo.svg" alt="ตราสัญลักษณ์เขต">
+    <div>
+      <h1>จัดการเกียรติบัตร</h1>
+      <p>สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="admin.html"
+       style="margin-left:auto;text-decoration:none;display:inline-flex;align-items:center">← ระบบส่งผลงาน</a>
+  </div>
+</header>
+
+<!-- ---------- login gate ---------- -->
+<div class="page" id="gate">
+  <div class="card gate">
+    <div class="body">
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p>กรุณากรอกรหัสผ่านผู้ดูแลระบบ</p>
+      <div class="alert" id="gErr"></div>
+      <input type="password" id="pw" placeholder="รหัสผ่านผู้ดูแล" autocomplete="current-password">
+      <button class="btn btn-main" id="login" style="width:100%;margin-top:12px">เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- app ---------- -->
+<div class="page" id="app" style="display:none">
+
+  <div class="card">
+    <div class="body">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div>
+          <div style="font-size:17px;font-weight:800;letter-spacing:-.35px">กิจกรรมทั้งหมด</div>
+          <div class="hint" style="margin-top:2px">แต่ละกิจกรรมมีรายชื่อและพื้นหลังเกียรติบัตรของตัวเอง อัปแยกกันได้</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" id="reload">รีเฟรช</button>
+          <button class="btn btn-main btn-sm" id="newAct">➕ สร้างกิจกรรมใหม่</button>
+        </div>
+      </div>
+      <div class="alert" id="err" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <div class="acts" id="acts"></div>
+  <div class="card" id="none" style="display:none"><div class="empty2">ยังไม่มีกิจกรรม กด “สร้างกิจกรรมใหม่” เพื่อเริ่มต้น</div></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
+let TOKEN = '', ACTS = [];
+
+/* JSONP — เลี่ยงปัญหา CORS ของ Apps Script */
+function call(params){
+  return new Promise((ok,no)=>{
+    const cb='__cb'+Math.floor(performance.now()*1000)+'_'+(call._i=(call._i||0)+1);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();no(new Error('หมดเวลาเชื่อมต่อ'))},30000);
+    function cleanup(){clearTimeout(t);delete window[cb];s.remove()}
+    window[cb]=d=>{cleanup();ok(d)};
+    s.onerror=()=>{cleanup();no(new Error('ไม่สามารถเรียก API ได้'))};
+    const q=Object.entries(params).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    s.src=API_URL+'?'+q+'&callback='+cb;
+    document.body.appendChild(s);
+  });
+}
+
+/* POST (ข้อมูลก้อนใหญ่ — รายชื่อ / ไฟล์พื้นหลัง) */
+async function post(payload){
+  const r = await fetch(API_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(Object.assign({token:TOKEN}, payload))
+  });
+  return r.json();
+}
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- login ---------- */
+const gate=document.getElementById('gate'), app=document.getElementById('app');
+document.getElementById('login').addEventListener('click', doLogin);
+document.getElementById('pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const pw = document.getElementById('pw').value.trim();
+  const gErr = document.getElementById('gErr'); gErr.classList.remove('on');
+  if(!pw){ gErr.textContent='กรุณากรอกรหัสผ่าน'; gErr.classList.add('on'); return; }
+  const b = document.getElementById('login'); b.disabled=true; b.innerHTML='<i class="spin"></i>กำลังตรวจสอบ...';
+  try{
+    const out = await call({action:'actList', token:pw});
+    if(out.ok){
+      TOKEN = pw; sessionStorage.setItem('bpal_t', pw);
+      gate.style.display='none'; app.style.display='block';
+      render(out.acts||[]);
+      if(!(out.acts||[]).length) migrate();
+    } else { gErr.textContent = out.message||'รหัสผ่านไม่ถูกต้อง'; gErr.classList.add('on'); }
+  }catch(e){ gErr.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; gErr.classList.add('on'); }
+  b.disabled=false; b.textContent='เข้าสู่ระบบ';
+}
+
+async function migrate(){
+  if(!confirm('ยังไม่มีกิจกรรมในระบบ\n\nต้องการย้ายข้อมูล Best Practice 2569 ที่มีอยู่เข้าเป็นกิจกรรมแรกเลยไหม?')) return;
+  try{
+    const r = await call({action:'migrateBP', token:TOKEN});
+    if(r.ok) alert('ย้ายข้อมูลเรียบร้อย เพิ่ม '+(r.added||0)+' รายการ');
+    else alert(r.message||'ย้ายข้อมูลไม่สำเร็จ');
+  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+  await reload();
+}
+
+async function reload(){
+  const er = document.getElementById('err'); er.classList.remove('on');
+  try{
+    const out = await call({action:'actList', token:TOKEN});
+    if(out.ok) render(out.acts||[]);
+    else { er.textContent = out.message; er.classList.add('on'); }
+  }catch(e){ er.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; er.classList.add('on'); }
+}
+document.getElementById('reload').addEventListener('click', reload);
+
+/* ---------- แสดงรายการกิจกรรม ---------- */
+function statusPill(a){
+  if(a.status !== 'เปิด') return '<span class="pill off">⏸ ปิด</span>';
+  return a.live ? '<span class="pill live">● เปิดให้ค้นหาแล้ว</span>'
+                : '<span class="pill wait">⏳ รอถึงวันเปิด</span>';
+}
+function thDate(iso){
+  if(!iso) return 'ไม่กำหนด (เปิดทันที)';
+  const d = new Date(iso); if(isNaN(d.getTime())) return esc(iso);
+  const M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d.getDate()+' '+M[d.getMonth()]+' '+(d.getFullYear()+543)+' '+('0'+d.getHours()).slice(-2)+'.'+('0'+d.getMinutes()).slice(-2)+' น.';
+}
+function render(acts){
+  ACTS = acts;
+  document.getElementById('none').style.display = acts.length ? 'none' : 'block';
+  document.getElementById('acts').innerHTML = acts.map(function(a,i){
+    return '<div class="act" data-i="'+i+'">'
+      + '<div class="h">'
+      +   '<div><div class="nm">'+esc(a.name)+'</div><div class="cd">'+esc(a.code)+'</div>'
+      +     '<div class="meta"><span>ปี '+esc(a.year||'-')+'</span>'
+      +       '<span>รายชื่อ '+a.n+' คน</span>'
+      +       '<span>'+(a.hasTpl ? '🖼 มีพื้นหลังแล้ว' : '⚠️ ยังไม่มีพื้นหลัง')+'</span>'
+      +       '<span>เปิด '+thDate(a.openAt)+'</span></div></div>'
+      +   '<div class="acts-r">'+statusPill(a)+'<button class="btn btn-ghost btn-sm tg">จัดการ</button></div>'
+      + '</div>'
+      + '<div class="b">'+bodyHtml(a,i)+'</div></div>';
+  }).join('');
+  wire();
+}
+function bodyHtml(a,i){
+  return ''
+  + '<div class="sect" style="margin-top:0;padding-top:0;border:none"><h4>⚙️ ตั้งค่ากิจกรรม</h4>'
+  +  '<div class="grid2">'
+  +   '<div class="fl"><label>ชื่อกิจกรรม</label><input type="text" class="f-name" value="'+esc(a.name)+'"></div>'
+  +   '<div class="fl"><label>ปีงบประมาณ</label><input type="text" class="f-year" value="'+esc(a.year||'')+'"></div>'
+  +   '<div class="fl"><label>วันเปิดให้ดาวน์โหลด</label><input type="datetime-local" class="f-open" value="'+esc(toLocalInput(a.openAt))+'"></div>'
+  +   '<div class="fl"><label>สถานะ</label><select class="f-status">'
+  +     '<option value="ปิด"'+(a.status!=='เปิด'?' selected':'')+'>ปิด — ครูยังค้นหาไม่ได้</option>'
+  +     '<option value="เปิด"'+(a.status==='เปิด'?' selected':'')+'>เปิด — เปิดตามวันที่กำหนด</option>'
+  +   '</select></div>'
+  +  '</div>'
+  +  '<div class="row"><button class="btn btn-main btn-sm sv">บันทึกการตั้งค่า</button>'
+  +   '<button class="btn btn-ghost btn-sm del" style="color:#9f1239;border-color:#fecdd3">ลบกิจกรรม</button></div>'
+  + '</div>'
+
+  + '<div class="sect"><h4>🖼 พื้นหลังเกียรติบัตร</h4>'
+  +  '<div class="tplbox">'
+  +   (a.hasTpl ? '<img class="tplimg" alt="พื้นหลังเกียรติบัตร" data-act="'+esc(a.code)+'">' : '')
+  +   '<div><div class="hint" style="margin:0">'
+  +     (a.hasTpl ? 'ไฟล์ปัจจุบัน: <b>'+esc(a.tplName||'-')+'</b><br>' : '')
+  +     'รองรับ PNG / JPG ขนาดไม่เกิน 10 MB · แนะนำแนวนอน A4 ด้านกว้าง 3500 px<br>อัปใหม่ทับได้ตลอด ไฟล์เดิมจะถูกแทนที่</div>'
+  +    '<div class="row"><input type="file" class="f-tpl" accept="image/png,image/jpeg" style="max-width:320px">'
+  +     '<button class="btn btn-main btn-sm up">อัปโหลดพื้นหลัง</button></div>'
+  +   '</div>'
+  +  '</div>'
+  + '</div>'
+
+  + '<div class="sect"><h4>📤 อัปรายชื่อผู้รับเกียรติบัตร</h4>'
+  +  '<div class="fl"><label>วางข้อมูลจาก Excel (คัดลอกทั้งบล็อกแล้ววางที่นี่) หรือพิมพ์แบบคั่นด้วย Tab / จุลภาค</label>'
+  +   '<textarea class="f-rows" placeholder="คำนำหน้า&#9;ชื่อ - สกุล&#9;ตำแหน่ง&#9;โรงเรียน&#9;กลุ่มโรงเรียน&#9;ประเภท/หมวด&#9;ชื่อผลงาน&#9;ระดับรางวัล&#9;คะแนน&#10;นาง&#9;สุนิสา ปัญญาดี&#9;ครูชำนาญการพิเศษ&#9;โรงเรียนอนุบาลอุดรธานี&#9;กลุ่มเมือง 1&#9;Active Learning&#9;การจัดการเรียนรู้เชิงรุก 5E&#9;ทอง&#9;92"></textarea>'
+  +   '<div class="hint">ลำดับคอลัมน์: <b>คำนำหน้า · ชื่อ-สกุล · ตำแหน่ง · โรงเรียน · กลุ่มโรงเรียน · ประเภท/หมวด · ชื่อผลงาน · ระดับรางวัล · คะแนน</b><br>'
+  +     'บรรทัดแรกเป็นหัวตารางได้ ระบบจะข้ามให้เอง · ช่องที่ไม่มีข้อมูลเว้นว่างไว้ได้ · ระดับรางวัลที่เว้นว่างจะถือว่า “เข้าร่วม”</div></div>'
+  +  '<div class="row"><button class="btn btn-main btn-sm addr">เพิ่มเข้ารายชื่อ</button>'
+  +   '<button class="btn btn-ghost btn-sm rep">แทนที่รายชื่อทั้งหมด</button>'
+  +   '<button class="btn btn-ghost btn-sm clr" style="color:#9f1239;border-color:#fecdd3">ล้างรายชื่อ ('+a.n+')</button></div>'
+  + '</div>';
+}
+function toLocalInput(iso){
+  if(!iso) return '';
+  const d = new Date(iso); if(isNaN(d.getTime())) return '';
+  const p = n => ('0'+n).slice(-2);
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+/* ---------- แปลงข้อความที่วางมาเป็นรายชื่อ ---------- */
+function parseRows(text){
+  const lines = String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const out = [];
+  lines.forEach(function(ln, idx){
+    const c = ln.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(x=>x.trim().replace(/^"|"$/g,''));
+    if(idx===0 && /ชื่อ|สกุล|คำนำหน้า|name/i.test(c[0]+' '+(c[1]||''))) return;   // ข้ามหัวตาราง
+    const name = (c[1]||'').trim();
+    if(!name) return;
+    out.push({ prefix:c[0]||'', fullname:name, position:c[2]||'', school:c[3]||'',
+               schoolGroup:c[4]||'', ptype:c[5]||'', title:c[6]||'', award:c[7]||'', score:c[8]||'' });
+  });
+  return out;
+}
+
+/* ---------- ผูกปุ่มในแต่ละการ์ด ---------- */
+function wire(){
+  document.querySelectorAll('.act').forEach(function(el){
+    const a = ACTS[+el.dataset.i];
+    const q = s => el.querySelector(s);
+
+    q('.tg').addEventListener('click', function(){
+      el.classList.toggle('open');
+      this.textContent = el.classList.contains('open') ? 'ย่อ' : 'จัดการ';
+      const im = q('.tplimg');
+      if(el.classList.contains('open') && im && !im.src) loadTpl(im, a.code);
+    });
+
+    q('.sv').addEventListener('click', async function(){
+      this.disabled=true; const o=this.textContent; this.textContent='กำลังบันทึก...';
+      try{
+        const r = await call({action:'actSave', token:TOKEN, code:a.code,
+          name:q('.f-name').value.trim(), year:q('.f-year').value.trim(),
+          openAt:q('.f-open').value ? new Date(q('.f-open').value).toISOString() : '',
+          status:q('.f-status').value, note:a.note||''});
+        if(r.ok){ await reload(); return; }
+        alert(r.message||'บันทึกไม่สำเร็จ');
+      }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+      this.disabled=false; this.textContent=o;
+    });
+
+    q('.del').addEventListener('click', async function(){
+      if(!confirm('ลบกิจกรรม “'+a.name+'” ?\n\nลบได้เฉพาะกิจกรรมที่ไม่มีรายชื่อแล้วเท่านั้น')) return;
+      try{
+        const r = await call({action:'actDelete', token:TOKEN, code:a.code});
+        if(r.ok) await reload(); else alert(r.message);
+      }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+    });
+
+    q('.up').addEventListener('click', async function(){
+      const f = q('.f-tpl').files[0];
+      if(!f) return alert('กรุณาเลือกไฟล์พื้นหลังก่อน');
+      if(f.size > 10*1024*1024) return alert('ไฟล์มีขนาดเกิน 10 MB');
+      this.disabled=true; const o=this.textContent; this.textContent='กำลังอัปโหลด...';
+      try{
+        const b64 = await toB64(f);
+        const r = await post({action:'tplUpload', act:a.code, name:f.name, mime:f.type, data:b64});
+        if(r.ok){ alert('อัปโหลดพื้นหลังเรียบร้อย'); await reload(); return; }
+        alert(r.message||'อัปโหลดไม่สำเร็จ');
+      }catch(e){ alert('อัปโหลดไม่สำเร็จ: '+e.message); }
+      this.disabled=false; this.textContent=o;
+    });
+
+    q('.addr').addEventListener('click', function(){ sendRows(el, a, false, this); });
+    q('.rep').addEventListener('click',  function(){
+      if(!confirm('แทนที่รายชื่อทั้งหมดของกิจกรรมนี้?\n\nรายชื่อเดิม '+a.n+' รายการจะถูกลบก่อน แล้วใส่ชุดใหม่แทน')) return;
+      sendRows(el, a, true, this);
+    });
+    q('.clr').addEventListener('click', async function(){
+      if(!confirm('ล้างรายชื่อทั้งหมดของ “'+a.name+'” ?\n\nลบ '+a.n+' รายการ และย้อนกลับไม่ได้')) return;
+      try{
+        const r = await call({action:'certClear', token:TOKEN, act:a.code});
+        if(r.ok){ alert('ลบแล้ว '+r.removed+' รายการ'); await reload(); }
+        else alert(r.message);
+      }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+    });
+  });
+}
+
+async function sendRows(el, a, replace, btn){
+  const rows = parseRows(el.querySelector('.f-rows').value);
+  if(!rows.length) return alert('ไม่พบรายชื่อในข้อความที่วาง กรุณาตรวจสอบรูปแบบอีกครั้ง');
+  if(!confirm('พบ '+rows.length+' รายชื่อ ต้องการ'+(replace?'แทนที่ทั้งหมด':'เพิ่มเข้าระบบ')+'ใช่ไหม?')) return;
+  btn.disabled=true; const o=btn.textContent; btn.textContent='กำลังบันทึก...';
+  try{
+    const r = await post({action:'certAdd', act:a.code, rows:rows, replace:replace});
+    if(r.ok){
+      alert('เรียบร้อย\n\nเพิ่ม '+r.added+' รายการ'+(r.skipped?'\nข้าม '+r.skipped+' รายการ (ซ้ำหรือไม่มีชื่อ)':'')+'\nรวมทั้งหมด '+r.total+' รายการ');
+      el.querySelector('.f-rows').value='';
+      await reload(); return;
+    }
+    alert(r.message||'บันทึกไม่สำเร็จ');
+  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+  btn.disabled=false; btn.textContent=o;
+}
+
+function toB64(file){
+  return new Promise(function(ok,no){
+    const rd = new FileReader();
+    rd.onload = () => ok(String(rd.result).split(',')[1]);
+    rd.onerror = () => no(new Error('อ่านไฟล์ไม่สำเร็จ'));
+    rd.readAsDataURL(file);
+  });
+}
+async function loadTpl(img, code){
+  try{
+    const r = await call({action:'certTemplate', act:code});
+    if(r && r.ok) img.src = 'data:'+(r.mime||'image/png')+';base64,'+r.data;
+  }catch(e){}
+}
+
+/* ---------- สร้างกิจกรรมใหม่ ---------- */
+document.getElementById('newAct').addEventListener('click', async function(){
+  const name = prompt('ชื่อกิจกรรม\n\nเช่น การอบรมเชิงปฏิบัติการ PLC, การแข่งขันศิลปหัตถกรรม');
+  if(!name || !name.trim()) return;
+  const code = prompt('รหัสกิจกรรม (ภาษาอังกฤษ/ตัวเลข ห้ามเว้นวรรค)\n\nเช่น PLC2569, ART2570');
+  if(!code || !code.trim()) return;
+  const year = prompt('ปีงบประมาณ', String(new Date().getFullYear()+543)) || '';
+  try{
+    const r = await call({action:'actSave', token:TOKEN, code:code.trim(), name:name.trim(),
+                          year:year.trim(), openAt:'', status:'ปิด', note:''});
+    if(r.ok) await reload(); else alert(r.message||'สร้างไม่สำเร็จ');
+  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+});
+
+/* auto-login จาก session เดิม */
+(function(){
+  const t = sessionStorage.getItem('bpal_t');
+  if(t && API_URL){ document.getElementById('pw').value = t; doLogin(); }
+})();
+</script>
+</body>
+</html>
