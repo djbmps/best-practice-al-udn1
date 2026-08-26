@@ -68,6 +68,17 @@ function doPost(e) {
     lock.waitLock(30000);
 
     const d = JSON.parse(e.postData.contents);
+
+    /* ---- คำสั่งฝั่งผู้ดูแล (ส่งข้อมูลก้อนใหญ่ผ่าน POST) ---- */
+    if (d.action === 'certAdd') {
+      if (d.token !== ADMIN_PASS) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+      return json(addCerts(d.act, d.rows, d.replace === true));
+    }
+    if (d.action === 'tplUpload') {
+      if (d.token !== ADMIN_PASS) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+      return json(saveTemplate(d.act, d.name, d.mime, d.data));
+    }
+
     if (d.action !== 'submit') return json({ ok: false, message: 'คำสั่งไม่ถูกต้อง' });
     if (!isOpen()) return json({ ok: false, message: CLOSED_MSG });
 
@@ -183,26 +194,35 @@ function doGet(e) {
     out = (p.token === ADMIN_PASS)
       ? { ok: true, open: setOpen(String(p.open) === '1' || String(p.open) === 'true') }
       : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
-  } else if (p.action === 'searchResult') {
-    out = searchResults(p.q);
-  } else if (p.action === 'resultSummary') {
-    out = resultSummary();
+  } else if (p.action === 'certStatus') {
+    out = certStatus();
+  } else if (p.action === 'certSummary') {
+    out = certSummary(p.act);
+  } else if (p.action === 'certSearch') {
+    out = searchCerts(p.act, p.q, p.ptype);
   } else if (p.action === 'certTemplate') {
-    out = getCertTemplate();
-  } else if (p.action === 'resultStatus') {
-    out = { ok: true, published: isPublished(), approved: isApproved(), openAt: openAtIso() };
-  } else if (p.action === 'setOpenAt') {
-    out = (p.token === ADMIN_PASS) ? setOpenAt(p.at) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
-  } else if (p.action === 'syncResults') {
+    out = getTemplate(p.act);
+
+  /* ---------- ผู้ดูแลระบบ ---------- */
+  } else if (p.action === 'actList') {
     if (p.token !== ADMIN_PASS) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
-    else { var sy = syncResults(); out = { ok: true, added: sy.added, total: sy.total }; }
-  } else if (p.action === 'setPublished') {
+    else {
+      out = { ok: true, acts: readActs().map(function (a) {
+        return { code: a.code, name: a.name, year: a.year, openAt: a.openAt,
+                 status: a.status, tplName: a.tplName, hasTpl: !!a.tplId,
+                 n: certCount(a.code), live: actLive(a), note: a.note }; }) };
+    }
+  } else if (p.action === 'actSave') {
     if (p.token !== ADMIN_PASS) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
-    else { setPublished(String(p.pub) === '1' || String(p.pub) === 'true');
-           var ps = pubState(); out = { ok: true, published: ps.published, approved: ps.approved, openAt: ps.openAt }; }
-  } else if (p.action === 'setCertTemplate') {
-    if (p.token !== ADMIN_PASS) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
-    else { try { out = setCertTemplate(p.id); } catch (e) { out = { ok: false, message: e.message }; } }
+    else { out = saveAct({ code: p.code, name: p.name, year: p.year, openAt: p.openAt,
+                           status: p.status, note: p.note }); }
+  } else if (p.action === 'actDelete') {
+    out = (p.token === ADMIN_PASS) ? deleteAct(p.code) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+  } else if (p.action === 'certClear') {
+    out = (p.token === ADMIN_PASS) ? clearCerts(p.act) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+  } else if (p.action === 'migrateBP') {
+    out = (p.token === ADMIN_PASS) ? migrateBP2569() : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+
   } else {
     out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
   }
@@ -423,150 +443,294 @@ function jsonp(cb, obj) {
 }
 
 /* ===============================================================
- *  ระบบประกาศผลและเกียรติบัตร
+ *  ระบบเกียรติบัตรกลาง — รองรับหลายกิจกรรม ค้นหาย้อนหลังได้
+ *  แท็บ 'กิจกรรม'    = ทะเบียนกิจกรรม (1 กิจกรรม = 1 เทมเพลต)
+ *  แท็บ 'เกียรติบัตร' = รายชื่อผู้รับทุกคน ผูกกับรหัสกิจกรรม
  * =============================================================== */
-const SHEET_RESULT = 'ผลการประเมิน';
-const HEADERS_RESULT = [
-  'ลำดับ', 'เลขที่เกียรติบัตร', 'รหัสอ้างอิง', 'ประเภทผลงาน', 'กลุ่มสาระ', 'ชื่อผลงาน',
-  'คำนำหน้า', 'ชื่อ - สกุล', 'ตำแหน่ง', 'กลุ่มโรงเรียน', 'โรงเรียน',
+const SHEET_ACT  = 'กิจกรรม';
+const SHEET_CERT = 'เกียรติบัตร';
+
+const HEADERS_ACT = [
+  'รหัสกิจกรรม', 'ชื่อกิจกรรม', 'ปีงบประมาณ', 'วันเปิดดาวน์โหลด',
+  'สถานะ', 'รหัสไฟล์พื้นหลัง', 'ชื่อไฟล์พื้นหลัง', 'หมายเหตุ'
+];
+const HEADERS_CERT = [
+  'ลำดับ', 'รหัสกิจกรรม', 'เลขที่เกียรติบัตร', 'รหัสอ้างอิง', 'ประเภท/หมวด',
+  'ชื่อผลงาน', 'คำนำหน้า', 'ชื่อ - สกุล', 'ตำแหน่ง', 'กลุ่มโรงเรียน', 'โรงเรียน',
   'ระดับรางวัล', 'คะแนน', 'หมายเหตุ'
 ];
 const AWARD_DEFAULT = 'เข้าร่วม';
+const ACT_BP2569    = 'BP2569';
 
-/* วันเวลาที่เปิดให้ดาวน์โหลดเกียรติบัตร (เวลาไทย) — แก้ได้จากหน้า admin */
-const RESULT_OPEN_AT_DEFAULT = '2026-09-08T08:00:00+07:00';
-
-function openAtIso() {
-  return PropertiesService.getScriptProperties().getProperty('RESULT_OPEN_AT') || RESULT_OPEN_AT_DEFAULT;
-}
-function openAtMs() {
-  var t = new Date(openAtIso()).getTime();
-  return isNaN(t) ? 0 : t;
-}
-function setOpenAt(iso) {
-  var t = new Date(String(iso)).getTime();
-  if (isNaN(t)) return { ok: false, message: 'รูปแบบวันที่ไม่ถูกต้อง' };
-  PropertiesService.getScriptProperties().setProperty('RESULT_OPEN_AT', String(iso));
-  return { ok: true, openAt: openAtIso() };
-}
-
-/* อนุมัติเผยแพร่แล้ว (สวิตช์) */
-function isApproved() {
-  return PropertiesService.getScriptProperties().getProperty('RESULT_PUBLISHED') === 'ON';
-}
-/* เปิดให้ค้นหา/ดาวน์โหลดจริง = อนุมัติแล้ว และถึงวันเปิดแล้ว */
-function isPublished() {
-  return isApproved() && (new Date().getTime() >= openAtMs());
-}
-function setPublished(on) {
-  PropertiesService.getScriptProperties().setProperty('RESULT_PUBLISHED', on ? 'ON' : 'OFF');
-  return isPublished();
-}
-function pubState() {
-  return { approved: isApproved(), published: isPublished(), openAt: openAtIso(), now: new Date().toISOString() };
-}
-
-function getResultSheet() {
+/* ---------- แผ่นงาน ---------- */
+function mkSheet(name, headers, color, widths) {
   const ss = SpreadsheetApp.openById(SHEET_ID);
-  var sh = ss.getSheetByName(SHEET_RESULT);
+  var sh = ss.getSheetByName(name);
   if (!sh) {
-    sh = ss.insertSheet(SHEET_RESULT);
-    sh.getRange(1, 1, 1, HEADERS_RESULT.length).setValues([HEADERS_RESULT])
-      .setBackground('#7c3aed').setFontColor('#ffffff').setFontWeight('bold')
+    sh = ss.insertSheet(name);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers])
+      .setBackground(color).setFontColor('#ffffff').setFontWeight('bold')
       .setVerticalAlignment('middle').setHorizontalAlignment('center').setWrap(true);
     sh.setFrozenRows(1);
     sh.setRowHeight(1, 42);
-    [55, 150, 120, 230, 190, 300, 90, 190, 170, 250, 230, 130, 90, 200]
-      .forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
+    widths.forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
   }
   return sh;
 }
+function getActSheet() {
+  return mkSheet(SHEET_ACT, HEADERS_ACT, '#b45309',
+    [130, 380, 110, 190, 100, 300, 260, 240]);
+}
+function getCertSheet() {
+  return mkSheet(SHEET_CERT, HEADERS_CERT, '#7c3aed',
+    [55, 130, 150, 130, 250, 300, 90, 190, 170, 250, 230, 130, 90, 200]);
+}
 
-/* ดึงรายชื่อผู้ส่งทั้งหมดเข้าตารางผล (ข้ามรายการที่มีอยู่แล้ว) */
-function syncResults() {
-  const sh   = getResultSheet();
-  const last = sh.getLastRow();
-  const seen = {};
-  if (last >= 2) {
-    sh.getRange(2, 3, last - 1, 1).getDisplayValues()
-      .forEach(function (r) { seen[String(r[0]).trim()] = true; });
+/* ---------- ทะเบียนกิจกรรม ---------- */
+function readActs() {
+  const sh = getActSheet(), last = sh.getLastRow();
+  if (last < 2) return [];
+  return sh.getRange(2, 1, last - 1, HEADERS_ACT.length).getDisplayValues()
+    .filter(function (r) { return String(r[0]).trim() !== ''; })
+    .map(function (r) {
+      return {
+        code: String(r[0]).trim(), name: r[1], year: r[2], openAt: String(r[3] || '').trim(),
+        status: String(r[4] || '').trim(), tplId: String(r[5] || '').trim(),
+        tplName: r[6], note: r[7]
+      };
+    });
+}
+function findAct(code) {
+  const c = String(code || '').trim();
+  const a = readActs().filter(function (x) { return x.code === c; });
+  return a.length ? a[0] : null;
+}
+function actRowIndex(code) {
+  const sh = getActSheet(), last = sh.getLastRow();
+  if (last < 2) return -1;
+  const v = sh.getRange(2, 1, last - 1, 1).getDisplayValues();
+  for (var i = 0; i < v.length; i++) if (String(v[i][0]).trim() === String(code).trim()) return i + 2;
+  return -1;
+}
+/* เปิดให้ค้นหา/ดาวน์โหลดจริง = สถานะเปิด และถึงวันเปิดแล้ว */
+function actLive(a) {
+  if (!a || a.status !== 'เปิด') return false;
+  const t = new Date(a.openAt).getTime();
+  return isNaN(t) ? true : (new Date().getTime() >= t);
+}
+
+function saveAct(d) {
+  const code = String(d.code || '').trim().toUpperCase();
+  if (!/^[A-Z0-9_-]{2,20}$/.test(code)) {
+    return { ok: false, message: 'รหัสกิจกรรมใช้ได้เฉพาะ A-Z 0-9 - _ ความยาว 2-20 ตัว' };
   }
+  if (!String(d.name || '').trim()) return { ok: false, message: 'กรุณากรอกชื่อกิจกรรม' };
+  const sh  = getActSheet();
+  const row = [code, d.name, d.year || '', d.openAt || '',
+               d.status === 'เปิด' ? 'เปิด' : 'ปิด', d.tplId || '', d.tplName || '', d.note || ''];
+  const at = actRowIndex(code);
+  if (at > 0) {
+    const cur = sh.getRange(at, 1, 1, HEADERS_ACT.length).getDisplayValues()[0];
+    if (!row[5]) { row[5] = cur[5]; row[6] = cur[6]; }   // ไม่ส่งเทมเพลตมา = คงของเดิม
+    sh.getRange(at, 1, 1, HEADERS_ACT.length).setValues([row]);
+  } else {
+    sh.appendRow(row);
+  }
+  return { ok: true, act: findAct(code) };
+}
+function deleteAct(code) {
+  const at = actRowIndex(code);
+  if (at < 1) return { ok: false, message: 'ไม่พบกิจกรรมนี้' };
+  const n = readCerts(code).length;
+  if (n > 0) return { ok: false, message: 'กิจกรรมนี้มีรายชื่ออยู่ ' + n + ' รายการ กรุณาลบรายชื่อก่อน' };
+  getActSheet().deleteRow(at);
+  return { ok: true };
+}
+
+/* ---------- รายชื่อผู้รับเกียรติบัตร ---------- */
+function readCerts(actCode) {
+  const sh = getCertSheet(), last = sh.getLastRow();
+  if (last < 2) return [];
+  const c = String(actCode || '').trim();
+  return sh.getRange(2, 1, last - 1, HEADERS_CERT.length).getDisplayValues()
+    .filter(function (r) { return String(r[1]).trim() !== '' && (!c || String(r[1]).trim() === c); })
+    .map(function (r) {
+      return {
+        seq: r[0], act: String(r[1]).trim(), certNo: r[2], refCode: r[3], ptype: r[4],
+        title: r[5], prefix: r[6], fullname: r[7], name: (r[6] || '') + r[7],
+        position: r[8], schoolGroup: r[9], school: r[10],
+        award: String(r[11] || '').trim() || AWARD_DEFAULT, score: r[12], note: r[13]
+      };
+    });
+}
+function certCount(actCode) { return readCerts(actCode).length; }
+
+/* เพิ่มรายชื่อเข้ากิจกรรม — rows = [{refCode,ptype,title,prefix,fullname,position,schoolGroup,school,award,score,note}] */
+function addCerts(actCode, rows, replace) {
+  const code = String(actCode || '').trim();
+  if (!findAct(code)) return { ok: false, message: 'ไม่พบกิจกรรม ' + code };
+  if (!rows || !rows.length) return { ok: false, message: 'ไม่มีข้อมูลรายชื่อ' };
+
+  const sh = getCertSheet();
+  if (replace) {
+    const last = sh.getLastRow();
+    if (last >= 2) {
+      const v = sh.getRange(2, 1, last - 1, 2).getDisplayValues();
+      for (var k = v.length - 1; k >= 0; k--) {
+        if (String(v[k][1]).trim() === code) sh.deleteRow(k + 2);
+      }
+    }
+  }
+
+  const existing = readCerts(code);
+  const seen = {};
+  existing.forEach(function (r) { if (r.refCode) seen[String(r.refCode).trim()] = true; });
+
+  var seq = existing.length;
+  const y   = String(findAct(code).year || (new Date().getFullYear() + 543)).slice(-2);
+  const out = [];
+  var skipped = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var d = rows[i] || {};
+    var name = String(d.fullname || '').trim();
+    if (!name) { skipped++; continue; }
+    var ref = String(d.refCode || '').trim();
+    if (ref && seen[ref]) { skipped++; continue; }
+    if (ref) seen[ref] = true;
+    seq++;
+    out.push([
+      seq, code, code + '-' + y + '/' + ('0000' + seq).slice(-4), ref,
+      d.ptype || '', d.title || '', d.prefix || '', name, d.position || '',
+      d.schoolGroup || '', d.school || '',
+      d.award || '', d.score || '', d.note || ''
+    ]);
+  }
+  if (out.length) sh.getRange(sh.getLastRow() + 1, 1, out.length, HEADERS_CERT.length).setValues(out);
+  return { ok: true, added: out.length, skipped: skipped, total: certCount(code) };
+}
+
+function clearCerts(actCode) {
+  const code = String(actCode || '').trim();
+  const sh = getCertSheet(), last = sh.getLastRow();
+  var n = 0;
+  if (last >= 2) {
+    const v = sh.getRange(2, 1, last - 1, 2).getDisplayValues();
+    for (var k = v.length - 1; k >= 0; k--) {
+      if (String(v[k][1]).trim() === code) { sh.deleteRow(k + 2); n++; }
+    }
+  }
+  return { ok: true, removed: n };
+}
+
+/* ---------- ย้ายข้อมูล Best Practice 2569 เข้าเป็นกิจกรรมแรก ---------- */
+function migrateBP2569() {
+  if (!findAct(ACT_BP2569)) {
+    saveAct({
+      code: ACT_BP2569, name: 'แนวปฏิบัติที่เป็นเลิศ (Best Practice)', year: '2569',
+      openAt: '2026-09-08T08:00:00+07:00', status: 'ปิด', note: 'ย้ายจากระบบเดิมอัตโนมัติ'
+    });
+  }
+  if (certCount(ACT_BP2569) > 0) return { ok: true, added: 0, note: 'มีข้อมูลอยู่แล้ว' };
   const src = readAll().concat(readSep()).filter(function (r) {
     return !/^TEST[-\s]/i.test(String(r.title || ''));
   });
-  const y    = (new Date().getFullYear() + 543).toString().slice(-2);
-  var seq    = Math.max(0, last - 1);
-  const rows = [];
-  for (var i = src.length - 1; i >= 0; i--) {
-    var r = src[i];
-    var ref = String(r.refCode || '').trim();
-    if (!ref || seen[ref]) continue;
-    seen[ref] = true;
-    seq++;
-    rows.push([
-      seq, y + '/' + ('0000' + seq).slice(-4), ref,
-      r.ptype, r.subject || '', r.title,
-      r.prefix, r.fullname, r.position, r.schoolGroup, r.school,
-      '', '', ''
-    ]);
-  }
-  if (rows.length) sh.getRange(sh.getLastRow() + 1, 1, rows.length, HEADERS_RESULT.length).setValues(rows);
-  return { added: rows.length, total: Math.max(0, sh.getLastRow() - 1) };
-}
-
-function readResults() {
-  const sh   = getResultSheet();
-  const last = sh.getLastRow();
-  if (last < 2) return [];
-  const v = sh.getRange(2, 1, last - 1, HEADERS_RESULT.length).getDisplayValues();
-  return v.map(function (r) {
+  const rows = src.reverse().map(function (r) {
     return {
-      seq: r[0], certNo: r[1], refCode: r[2], ptype: r[3], subject: r[4], title: r[5],
-      prefix: r[6], fullname: r[7], name: (r[6] || '') + r[7],
-      position: r[8], schoolGroup: r[9], school: r[10],
-      award: String(r[11] || '').trim() || AWARD_DEFAULT,
-      score: r[12], note: r[13]
+      refCode: r.refCode, ptype: r.ptype, title: r.title, prefix: r.prefix,
+      fullname: r.fullname, position: r.position, schoolGroup: r.schoolGroup, school: r.school
     };
   });
+  return addCerts(ACT_BP2569, rows, false);
 }
 
-/* ค้นหาสาธารณะ — เปิดเมื่อเผยแพร่ผลแล้วเท่านั้น */
-function searchResults(q) {
-  if (!isPublished()) return { ok: false, published: false, openAt: openAtIso(), message: 'ยังไม่ประกาศผลการประเมิน' };
-  const s = String(q || '').trim().toLowerCase();
-  if (s.length < 2) return { ok: false, published: true, message: 'กรุณาพิมพ์คำค้นอย่างน้อย 2 ตัวอักษร' };
-  const rows = readResults().filter(function (r) {
-    return [r.refCode, r.certNo, r.name, r.school, r.schoolGroup, r.title]
-      .join(' ').toLowerCase().indexOf(s) > -1;
+/* ---------- ค้นหาสาธารณะ ---------- */
+function publicActs() {
+  return readActs().filter(actLive).map(function (a) {
+    return { code: a.code, name: a.name, year: a.year, n: certCount(a.code) };
   });
-  return { ok: true, published: true, rows: rows.slice(0, 60), more: Math.max(0, rows.length - 60) };
 }
-
-/* สรุปจำนวนตามระดับรางวัล (ใช้แสดงบนหน้าประกาศผล) */
-function resultSummary() {
-  if (!isPublished()) return { ok: true, published: false, total: 0, byAward: [], openAt: openAtIso(), approved: isApproved() };
-  const rows = readResults();
+/* กิจกรรมที่ประกาศแล้ว + กิจกรรมที่ยังไม่ถึงวัน (ไว้แสดงนับถอยหลัง) */
+function certStatus() {
+  const all = readActs();
+  return {
+    ok: true,
+    acts: publicActs(),
+    upcoming: all.filter(function (a) { return a.status === 'เปิด' && !actLive(a); })
+                 .map(function (a) { return { code: a.code, name: a.name, year: a.year, openAt: a.openAt }; })
+  };
+}
+function certTypes(actCode) {
+  const m = {};
+  readCerts(actCode).forEach(function (r) { var k = String(r.ptype || '').trim(); if (k) m[k] = (m[k] || 0) + 1; });
+  const out = Object.keys(m).map(function (k) { return { ptype: k, n: m[k] }; });
+  out.sort(function (a, b) { return b.n - a.n; });
+  return out;
+}
+function certSummary(actCode) {
+  const a = findAct(actCode);
+  if (!a) return { ok: false, message: 'ไม่พบกิจกรรม' };
+  if (!actLive(a)) return { ok: true, live: false, openAt: a.openAt, name: a.name, year: a.year };
+  const rows = readCerts(a.code);
   const m = {};
   rows.forEach(function (r) { m[r.award] = (m[r.award] || 0) + 1; });
   const byAward = Object.keys(m).map(function (k) { return { award: k, n: m[k] }; });
-  byAward.sort(function (a, b) { return b.n - a.n; });
-  return { ok: true, published: true, total: rows.length, byAward: byAward };
+  byAward.sort(function (x, y) { return y.n - x.n; });
+  return { ok: true, live: true, name: a.name, year: a.year, total: rows.length,
+           byAward: byAward, byType: certTypes(a.code) };
+}
+function searchCerts(actCode, q, ptype) {
+  const a = findAct(actCode);
+  if (!a) return { ok: false, message: 'ไม่พบกิจกรรม' };
+  if (!actLive(a)) return { ok: false, live: false, openAt: a.openAt, message: 'ยังไม่ถึงวันเปิดดาวน์โหลด' };
+  const s = String(q || '').trim().toLowerCase();
+  const t = String(ptype || '').trim();
+  if (s.length < 2 && !t) {
+    return { ok: false, live: true, message: 'กรุณาพิมพ์คำค้นอย่างน้อย 2 ตัวอักษร หรือเลือกประเภทผลงาน' };
+  }
+  var rows = readCerts(a.code);
+  if (t) rows = rows.filter(function (r) { return String(r.ptype) === t; });
+  if (s.length >= 2) {
+    rows = rows.filter(function (r) {
+      return [r.refCode, r.certNo, r.name, r.school, r.schoolGroup, r.title]
+        .join(' ').toLowerCase().indexOf(s) > -1;
+    });
+  }
+  const CAP = 200;
+  return { ok: true, live: true, actName: a.name, actYear: a.year,
+           rows: rows.slice(0, CAP), more: Math.max(0, rows.length - CAP) };
 }
 
-/* เทมเพลตเกียรติบัตร — เก็บเป็นไฟล์ใน Google Drive */
-function setCertTemplate(id) {
-  const f = DriveApp.getFileById(String(id).trim());
-  PropertiesService.getScriptProperties().setProperty('CERT_TEMPLATE_ID', f.getId());
-  return { ok: true, name: f.getName(), mime: f.getMimeType() };
+/* ---------- พื้นหลังเกียรติบัตร (1 กิจกรรม = 1 เทมเพลต) ---------- */
+function saveTemplate(actCode, name, mime, dataB64) {
+  const a = findAct(actCode);
+  if (!a) return { ok: false, message: 'ไม่พบกิจกรรม' };
+  if (!/^image\/(png|jpe?g)$/i.test(String(mime))) {
+    return { ok: false, message: 'พื้นหลังต้องเป็นไฟล์ PNG หรือ JPG เท่านั้น' };
+  }
+  const bytes = Utilities.base64Decode(dataB64);
+  if (bytes.length > MAX_BYTES) return { ok: false, message: 'ไฟล์พื้นหลังมีขนาดเกิน 10 MB' };
+  const isPng = (bytes[0] === -119 || bytes[0] === 137);
+  const isJpg = (bytes[0] === -1  || bytes[0] === 255);
+  if (!isPng && !isJpg) return { ok: false, message: 'ไฟล์พื้นหลังต้องเป็น PNG หรือ JPG เท่านั้น' };
+  const ext  = isPng ? '.png' : '.jpg';
+  const real = isPng ? 'image/png' : 'image/jpeg';
+  const blob = Utilities.newBlob(bytes, real, 'CERT_' + a.code + ext);
+  const f = getFolder().createFile(blob);
+  f.setDescription('พื้นหลังเกียรติบัตร: ' + a.name);
+  if (a.tplId) { try { DriveApp.getFileById(a.tplId).setTrashed(true); } catch (e) {} }
+  const at = actRowIndex(a.code);
+  getActSheet().getRange(at, 6, 1, 2).setValues([[f.getId(), name || f.getName()]]);
+  return { ok: true, tplId: f.getId(), tplName: name || f.getName() };
 }
-function getCertTemplate() {
-  const id = PropertiesService.getScriptProperties().getProperty('CERT_TEMPLATE_ID');
-  if (!id) return { ok: false, message: 'ยังไม่ได้ตั้งค่าเทมเพลตเกียรติบัตร' };
+function getTemplate(actCode) {
+  const a = findAct(actCode);
+  if (!a) return { ok: false, message: 'ไม่พบกิจกรรม' };
+  if (!a.tplId) return { ok: false, message: 'กิจกรรมนี้ยังไม่ได้อัปโหลดพื้นหลังเกียรติบัตร' };
   try {
-    const b = DriveApp.getFileById(id).getBlob();
+    const b = DriveApp.getFileById(a.tplId).getBlob();
     return { ok: true, mime: b.getContentType(), data: Utilities.base64Encode(b.getBytes()) };
   } catch (e) {
-    return { ok: false, message: 'อ่านไฟล์เทมเพลตไม่สำเร็จ: ' + e.message };
+    return { ok: false, message: 'อ่านไฟล์พื้นหลังไม่สำเร็จ: ' + e.message };
   }
 }
 
