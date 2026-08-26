@@ -205,8 +205,7 @@ td.wrap{white-space:normal;min-width:230px;max-width:340px}
           <button class="btn btn-main btn-sm" id="reload">รีเฟรช</button>
           <button class="btn btn-ghost btn-sm" id="csv">ส่งออก CSV</button>
           <button class="btn btn-ghost btn-sm" id="toggleOpen" style="display:none">—</button>
-          <button class="btn btn-ghost btn-sm" id="syncRes" style="display:none">📋 ดึงรายชื่อเข้าตารางผล</button>
-          <button class="btn btn-ghost btn-sm" id="togglePub" style="display:none">—</button>
+          <a class="btn btn-ghost btn-sm" href="cert-admin.html" style="text-decoration:none;display:inline-flex;align-items:center">🏅 จัดการเกียรติบัตร</a>
         </div>
       </div>
     </div>
@@ -278,7 +277,6 @@ async function doLogin(){
       gate.style.display='none'; app.style.display='block';
       render(out.rows||[]);
       loadStatus();
-      loadPubStatus();
     }else{
       gErr.textContent = out.message||'รหัสผ่านไม่ถูกต้อง'; gErr.classList.add('on');
     }
@@ -323,48 +321,6 @@ btnOpen.addEventListener('click', async ()=>{
     else{ alert(r&&r.message||'บันทึกไม่สำเร็จ'); btnOpen.textContent=old; }
   }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); btnOpen.textContent=old; }
   btnOpen.disabled=false;
-});
-
-/* ---------- ประกาศผล / เกียรติบัตร ---------- */
-let PUB_ON = false;
-const btnSync = document.getElementById('syncRes');
-const btnPub  = document.getElementById('togglePub');
-
-function paintPub(){
-  btnSync.style.display=''; btnPub.style.display='';
-  if(PUB_ON){
-    btnPub.textContent='🙈 ปิดประกาศผล';
-    btnPub.style.cssText='background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;color:#5b21b6;font-weight:700';
-  }else{
-    btnPub.textContent='📢 เผยแพร่ผล';
-    btnPub.style.cssText='background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;color:#92400e;font-weight:700';
-  }
-}
-async function loadPubStatus(){
-  try{ const r=await call({action:'resultStatus'}); if(r&&r.ok){ PUB_ON = r.published===true; paintPub(); } }catch(e){}
-}
-btnSync.addEventListener('click', async ()=>{
-  if(!confirm('ดึงรายชื่อผู้ส่งผลงานทั้งหมดเข้าตาราง “ผลการประเมิน”?\n\nรายการที่มีอยู่แล้วจะไม่ถูกเขียนทับ ระดับรางวัลและคะแนนที่กรอกไว้ยังอยู่ครบ')) return;
-  btnSync.disabled=true; const o=btnSync.textContent; btnSync.textContent='กำลังดึงข้อมูล...';
-  try{
-    const r=await call({action:'syncResults', token:TOKEN});
-    if(r&&r.ok) alert('เรียบร้อย\n\nเพิ่มใหม่ '+r.added+' รายการ\nรวมในตารางผลทั้งหมด '+r.total+' รายการ\n\nเปิด Google Sheet แท็บ “ผลการประเมิน” เพื่อกรอกระดับรางวัลและคะแนนได้เลย');
-    else alert(r&&r.message||'ดึงข้อมูลไม่สำเร็จ');
-  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
-  btnSync.disabled=false; btnSync.textContent=o;
-});
-btnPub.addEventListener('click', async ()=>{
-  const next=!PUB_ON;
-  const msg = next ? 'ยืนยันการเผยแพร่ผลการประเมิน?\n\nครูจะค้นหารายชื่อและดาวน์โหลดเกียรติบัตรได้ทันที\nโปรดตรวจสอบระดับรางวัลในชีตให้เรียบร้อยก่อน'
-                   : 'ยืนยันการปิดประกาศผล?\n\nหน้าค้นหาเกียรติบัตรจะกลับไปแสดงว่า “ยังไม่ประกาศผล”';
-  if(!confirm(msg)) return;
-  btnPub.disabled=true; const o=btnPub.textContent; btnPub.textContent='กำลังบันทึก...';
-  try{
-    const r=await call({action:'setPublished', token:TOKEN, pub: next?'1':'0'});
-    if(r&&r.ok){ PUB_ON = r.published===true; paintPub(); }
-    else { alert(r&&r.message||'บันทึกไม่สำเร็จ'); btnPub.textContent=o; }
-  }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); btnPub.textContent=o; }
-  btnPub.disabled=false;
 });
 
 /* JSONP — เลี่ยงปัญหา CORS ของ Apps Script */
