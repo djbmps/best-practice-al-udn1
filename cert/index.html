@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ประกาศผล และ ค้นหาเกียรติบัตร (Best Practice) 2569 | สพป.อุดรธานี เขต 1</title>
+<title>ระบบเกียรติบัตร (Best Practice) 2569 | สพป.อุดรธานี เขต 1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -56,6 +56,11 @@ body{
 .searchbox input{flex:1;min-width:260px;font-size:17px;padding:16px 18px}
 .hintrow{margin-top:10px;font-size:13.8px;color:var(--muted)}
 
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.picks .fl label{display:block;font-size:13.5px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+.picks select{width:100%;font-size:16px;padding:14px 40px 14px 16px}
+.actline{margin-top:12px;font-size:14px;color:var(--muted)}
+.actline b{color:var(--brand-dk)}
 /* ---------- สรุปผล ---------- */
 .sum{display:flex;gap:12px;flex-wrap:wrap;margin-top:2px}
 .sum .s{
@@ -114,7 +119,7 @@ body{
     <img class="crest" src="../logo.svg" alt="ตราสัญลักษณ์ สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1">
     <div>
       <p class="org">สำนักงานเขตพื้นที่การศึกษาประถมศึกษาอุดรธานี เขต 1</p>
-      <h1>ประกาศผล และ ค้นหาเกียรติบัตร</h1>
+      <h1>ระบบเกียรติบัตร</h1>
       <p class="yr">แนวปฏิบัติที่เป็นเลิศ (Best Practice) ประจำปีงบประมาณ 2569</p>
       <span class="slogan">Teach less, learn more for happiness — “เด็กอุดร 1 เป็นที่ 1”</span>
     </div>
@@ -149,11 +154,21 @@ body{
     <section class="card">
       <h2><span class="n">1</span> ค้นหารายชื่อ</h2>
       <div class="body">
-        <div class="searchbox">
+        <div class="picks">
+          <div class="fl">
+            <label for="act">กิจกรรม</label>
+            <select id="act"></select>
+          </div>
+          <div class="fl">
+            <label for="ptype">ประเภทผลงาน</label>
+            <select id="ptype"><option value="">ทุกประเภท</option></select>
+          </div>
+        </div>
+        <div class="searchbox" style="margin-top:14px">
           <input type="text" id="q" placeholder="🔍 พิมพ์ชื่อ-สกุล / โรงเรียน / รหัสอ้างอิง">
           <button type="button" class="btn btn-main" id="go">ค้นหา</button>
         </div>
-        <div class="hintrow" id="hint">พิมพ์อย่างน้อย 2 ตัวอักษร แล้วกดค้นหา หรือกด Enter</div>
+        <div class="hintrow" id="hint">เลือกประเภทผลงานเพื่อดูรายชื่อทั้งหมด หรือพิมพ์คำค้นอย่างน้อย 2 ตัวอักษร แล้วกด Enter</div>
         <div class="sum" id="sum" style="margin-top:16px"></div>
       </div>
     </section>
@@ -182,8 +197,7 @@ body{
 const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
 
 /* ============================================================
- *  ปรับตำแหน่งข้อความบนเกียรติบัตร  (ค่าเป็นสัดส่วน 0–1 ของภาพ)
- *  x = แนวนอน, y = แนวตั้ง, size = สัดส่วนความสูงตัวอักษรต่อความสูงภาพ
+ *  ตำแหน่งข้อความบนเกียรติบัตร (สัดส่วน 0–1 ของขนาดภาพ)
  * ============================================================ */
 const LAYOUT = {
   name:    { x:.500, y:.470, size:.062, weight:800, color:'#1a1a1a', align:'center', max:.72 },
@@ -192,36 +206,23 @@ const LAYOUT = {
   award:   { x:.500, y:.712, size:.036, weight:700, color:'#8a6d1f', align:'center', max:.70 },
   certNo:  { x:.500, y:.828, size:.020, weight:400, color:'#666666', align:'center', max:.50 }
 };
-/* ข้อความนำหน้าแต่ละบรรทัด (เว้นว่างได้) */
 const PREFIXTXT = {
-  school: 'โรงเรียน',
-  title:  'ผลงาน “',
-  titleSuffix: '”',
-  award:  'ได้รับรางวัลระดับ ',
-  certNo: 'เลขที่ '
+  school:'โรงเรียน', title:'ผลงาน “', titleSuffix:'”',
+  award:'ได้รับรางวัลระดับ ', certNo:'เลขที่ '
 };
 
 /* ---------- helper ---------- */
-/* เติมคำนำหน้า เว้นไว้ถ้าข้อความขึ้นต้นด้วยคำนั้นอยู่แล้ว (กัน "โรงเรียนโรงเรียน...") */
-function pre(p, v){
-  const t = String(v||'').trim();
-  if (!t) return '';
-  if (!p) return t;
-  return t.indexOf(p) === 0 ? t : (p + t);
-}
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function pre(p, v){ const t=String(v||'').trim(); if(!t) return ''; if(!p) return t; return t.indexOf(p)===0 ? t : (p+t); }
 function awardClass(a){
-  const s = String(a||'');
-  if (/ทอง(?!แดง)|gold/i.test(s)) return 'g';
-  if (/เงิน|silver/i.test(s))     return 's';
-  if (/ทองแดง|bronze/i.test(s))   return 'b';
-  if (/ชมเชย/i.test(s))           return 'h';
+  const s=String(a||'');
+  if(/ทอง(?!แดง)|gold/i.test(s)) return 'g';
+  if(/เงิน|silver/i.test(s))     return 's';
+  if(/ทองแดง|bronze/i.test(s))   return 'b';
+  if(/ชมเชย/i.test(s))           return 'h';
   return 'j';
 }
-function awardIcon(a){
-  const c = awardClass(a);
-  return c==='g'?'🥇':c==='s'?'🥈':c==='b'?'🥉':c==='h'?'🎖️':'🎗️';
-}
+function awardIcon(a){ const c=awardClass(a); return c==='g'?'🥇':c==='s'?'🥈':c==='b'?'🥉':c==='h'?'🎖️':'🎗️'; }
 function jsonp(params){
   return new Promise((ok,no)=>{
     const cb='__c'+Math.floor(Math.random()*1e9)+'_'+Date.now();
@@ -237,160 +238,220 @@ function jsonp(params){
 }
 
 /* ---------- หน้าจอ "ยังไม่เปิด" + นับถอยหลัง ---------- */
-const TH_MONTH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
-                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-function thaiDate(d){
-  return d.getDate() + ' ' + TH_MONTH[d.getMonth()] + ' ' + (d.getFullYear()+543);
-}
-function thaiTime(d){
-  return ('0'+d.getHours()).slice(-2) + '.' + ('0'+d.getMinutes()).slice(-2) + ' น.';
-}
-function showPending(openAt){
+const TH_MONTH=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_DAY=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+let cdTimer = null;
+function showPending(openAt, actName){
+  document.getElementById('mainBox').style.display='none';
   document.getElementById('pendBox').style.display='block';
-  if (!openAt) return;
-  const t = new Date(openAt);
-  if (isNaN(t.getTime())) return;
-  document.getElementById('pendIco').textContent = '📅';
-  document.getElementById('pendH').textContent = 'ยังไม่ถึงวันเปิดดาวน์โหลดเกียรติบัตร';
+  const t = openAt ? new Date(openAt) : null;
+  if(!t || isNaN(t.getTime())) return;
+  document.getElementById('pendIco').textContent='📅';
+  document.getElementById('pendH').textContent='ยังไม่ถึงวันเปิดดาวน์โหลดเกียรติบัตร';
   document.getElementById('pendP').textContent =
-    'ขณะนี้อยู่ระหว่างการพิจารณาของคณะกรรมการ ท่านจะสามารถค้นหารายชื่อและดาวน์โหลดเกียรติบัตรได้จากหน้านี้ เมื่อถึงกำหนดวันเปิดระบบ';
+    (actName ? actName + ' — ' : '') + 'ท่านจะสามารถค้นหารายชื่อและดาวน์โหลดเกียรติบัตรได้จากหน้านี้ เมื่อถึงกำหนดวันเปิดระบบ';
   document.getElementById('openWrap').style.display='block';
-  document.getElementById('openDate').textContent = 'วัน' + ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'][t.getDay()]
-    + 'ที่ ' + thaiDate(t) + ' เวลา ' + thaiTime(t);
-  const box = document.getElementById('cd');
-  function tick(){
-    let ms = t.getTime() - Date.now();
-    if (ms <= 0){ box.innerHTML='<div style="font-weight:700;color:#5b21b6">ถึงกำหนดแล้ว — กรุณารีเฟรชหน้านี้</div>'; return; }
-    const d = Math.floor(ms/86400000); ms -= d*86400000;
-    const h = Math.floor(ms/3600000);  ms -= h*3600000;
-    const m = Math.floor(ms/60000);    ms -= m*60000;
-    const sec = Math.floor(ms/1000);
-    box.innerHTML = [[d,'วัน'],[h,'ชั่วโมง'],[m,'นาที'],[sec,'วินาที']]
+  document.getElementById('openDate').textContent =
+    'วัน'+TH_DAY[t.getDay()]+'ที่ '+t.getDate()+' '+TH_MONTH[t.getMonth()]+' '+(t.getFullYear()+543)
+    +' เวลา '+('0'+t.getHours()).slice(-2)+'.'+('0'+t.getMinutes()).slice(-2)+' น.';
+  const box=document.getElementById('cd');
+  clearTimeout(cdTimer);
+  (function tick(){
+    let ms=t.getTime()-Date.now();
+    if(ms<=0){ box.innerHTML='<div style="font-weight:700;color:#5b21b6">ถึงกำหนดแล้ว — กรุณารีเฟรชหน้านี้</div>'; return; }
+    const d=Math.floor(ms/86400000); ms-=d*86400000;
+    const h=Math.floor(ms/3600000);  ms-=h*3600000;
+    const m=Math.floor(ms/60000);    ms-=m*60000;
+    box.innerHTML=[[d,'วัน'],[h,'ชั่วโมง'],[m,'นาที'],[Math.floor(ms/1000),'วินาที']]
       .map(u=>'<div class="cdu"><div class="v">'+u[0]+'</div><div class="k">'+u[1]+'</div></div>').join('');
-    setTimeout(tick, 1000);
-  }
-  tick();
+    cdTimer=setTimeout(tick,1000);
+  })();
 }
 
-/* ---------- โหลดสถานะ + สรุปผล ---------- */
-let ROWS = [];
+/* ---------- โหลดรายการกิจกรรม ---------- */
+let ROWS=[], ACT='';
 async function boot(){
   try{
-    const r = await jsonp({action:'resultSummary'});
-    if (!r || !r.published){ showPending(r && r.openAt); return; }
+    const r = await jsonp({action:'certStatus'});
+    const live = (r && r.acts) || [], up = (r && r.upcoming) || [];
+    if(!live.length){
+      if(up.length){
+        up.sort((a,b)=> new Date(a.openAt) - new Date(b.openAt));
+        showPending(up[0].openAt, up[0].name);
+      } else {
+        document.getElementById('pendBox').style.display='block';
+      }
+      return;
+    }
+    document.getElementById('pendBox').style.display='none';
     document.getElementById('mainBox').style.display='block';
-    const el = document.getElementById('sum');
-    let h = '<div class="s"><div class="k">ผลงานทั้งหมด</div><div class="v">'+(r.total||0)+'</div></div>';
-    (r.byAward||[]).forEach(a=>{
-      h += '<div class="s"><div class="k">'+awardIcon(a.award)+' '+esc(a.award)+'</div><div class="v">'+a.n+'</div></div>';
-    });
-    el.innerHTML = h;
+    const sel=document.getElementById('act');
+    sel.innerHTML = live.map(a =>
+      '<option value="'+esc(a.code)+'">'+esc(a.name)+(a.year?' · '+esc(a.year):'')+' ('+a.n+')</option>').join('');
+    ACT = live[0].code;
+    await loadAct();
   }catch(e){
     document.getElementById('pendBox').style.display='block';
-    document.getElementById('pendBox').querySelector('h3').textContent='เชื่อมต่อระบบไม่สำเร็จ';
-    document.getElementById('pendBox').querySelector('p').textContent='กรุณาลองใหม่อีกครั้งในภายหลัง ('+e.message+')';
+    document.getElementById('pendH').textContent='เชื่อมต่อระบบไม่สำเร็จ';
+    document.getElementById('pendP').textContent='กรุณาลองใหม่อีกครั้งในภายหลัง ('+e.message+')';
   }
+}
+
+async function loadAct(){
+  ACT = document.getElementById('act').value || ACT;
+  TPL = null;
+  document.getElementById('hits').innerHTML='';
+  const st=document.getElementById('state'); st.style.display='block';
+  st.textContent='เลือกประเภทผลงาน หรือพิมพ์คำค้นด้านบนเพื่อเริ่มค้นหา';
+  const sum=document.getElementById('sum'); sum.innerHTML='';
+  const tp=document.getElementById('ptype'); tp.innerHTML='<option value="">ทุกประเภท</option>';
+  try{
+    const r = await jsonp({action:'certSummary', act:ACT});
+    if(!r || !r.ok || !r.live) return;
+    sum.innerHTML = '<div class="s"><div class="k">ผลงานทั้งหมด</div><div class="v">'+(r.total||0)+'</div></div>'
+      + (r.byAward||[]).map(a=>'<div class="s"><div class="k">'+awardIcon(a.award)+' '+esc(a.award)+'</div><div class="v">'+a.n+'</div></div>').join('');
+    (r.byType||[]).forEach(t=>{
+      const o=document.createElement('option'); o.value=t.ptype;
+      o.textContent=t.ptype+' ('+t.n+')'; tp.appendChild(o);
+    });
+  }catch(e){}
 }
 
 /* ---------- ค้นหา ---------- */
 async function doSearch(){
-  const q = document.getElementById('q').value.trim();
-  const st = document.getElementById('state');
-  const hits = document.getElementById('hits');
+  const q=document.getElementById('q').value.trim();
+  const ptype=document.getElementById('ptype').value;
+  const st=document.getElementById('state'), hits=document.getElementById('hits');
   hits.innerHTML=''; ROWS=[];
-  if (q.length < 2){ st.style.display='block'; st.textContent='กรุณาพิมพ์คำค้นอย่างน้อย 2 ตัวอักษร'; return; }
+  if(q.length<2 && !ptype){
+    st.style.display='block';
+    st.textContent='กรุณาเลือกประเภทผลงาน หรือพิมพ์คำค้นอย่างน้อย 2 ตัวอักษร';
+    return;
+  }
   st.style.display='block'; st.textContent='กำลังค้นหา…';
   try{
-    const r = await jsonp({action:'searchResult', q:q});
-    if (!r || !r.ok){ st.textContent = (r && r.message) || 'ค้นหาไม่สำเร็จ'; return; }
-    ROWS = r.rows || [];
-    if (!ROWS.length){ st.textContent='ไม่พบรายชื่อที่ตรงกับคำค้น “'+q+'” — ลองพิมพ์เฉพาะชื่อ หรือชื่อโรงเรียนดูอีกครั้ง'; return; }
+    const r = await jsonp({action:'certSearch', act:ACT, q:q, ptype:ptype});
+    if(!r || !r.ok){ st.textContent=(r&&r.message)||'ค้นหาไม่สำเร็จ'; return; }
+    ROWS = r.rows||[];
+    if(!ROWS.length){
+      st.textContent='ไม่พบรายชื่อที่ตรงกับเงื่อนไข — ลองพิมพ์เฉพาะชื่อ หรือเปลี่ยนประเภทผลงานดูอีกครั้ง';
+      return;
+    }
     st.style.display='none';
-    hits.innerHTML = ROWS.map((r,i)=>
+    hits.innerHTML = ROWS.map((r2,i)=>
       '<div class="hit">'
       + '<div class="top"><div class="who">'
-      +   '<div class="nm">'+esc(r.name)+'</div>'
-      +   '<div class="sc">'+esc(r.position)+' · '+esc(r.school)+'</div>'
+      +   '<div class="nm">'+esc(r2.name)+'</div>'
+      +   '<div class="sc">'+esc(r2.position)+(r2.position&&r2.school?' · ':'')+esc(r2.school)+'</div>'
       + '</div>'
-      + '<div class="aw '+awardClass(r.award)+'">'+awardIcon(r.award)+' '+esc(r.award)+'</div></div>'
-      + '<div class="ti"><b>ผลงาน:</b> '+esc(r.title)+'</div>'
-      + '<div class="meta"><span>'+esc(r.ptype)+'</span>'
-      +   (r.subject ? '<span>'+esc(r.subject)+'</span>' : '')
-      +   '<span>'+esc(r.schoolGroup)+'</span>'
-      +   '<span>รหัส '+esc(r.refCode)+'</span></div>'
+      + '<div class="aw '+awardClass(r2.award)+'">'+awardIcon(r2.award)+' '+esc(r2.award)+'</div></div>'
+      + (r2.title ? '<div class="ti"><b>ผลงาน:</b> '+esc(r2.title)+'</div>' : '')
+      + '<div class="meta">'
+      +   (r2.ptype ? '<span>'+esc(r2.ptype)+'</span>' : '')
+      +   (r2.schoolGroup ? '<span>'+esc(r2.schoolGroup)+'</span>' : '')
+      +   (r2.refCode ? '<span>รหัส '+esc(r2.refCode)+'</span>' : '')
+      + '</div>'
       + '<div class="act">'
       +   '<button type="button" class="btn btn-main btn-sm" data-i="'+i+'">⬇ ดาวน์โหลดเกียรติบัตร</button>'
-      +   '<span class="certno">เลขที่ '+esc(r.certNo)+'</span>'
+      +   '<span class="certno">เลขที่ '+esc(r2.certNo)+'</span>'
       + '</div></div>').join('');
     hits.querySelectorAll('button[data-i]').forEach(b=>{
       b.addEventListener('click', ()=>makeCert(ROWS[+b.dataset.i], b));
     });
-    if (r.more) { st.style.display='block'; st.textContent='แสดง '+ROWS.length+' รายการแรก (ยังมีอีก '+r.more+' รายการ) — พิมพ์คำค้นให้เจาะจงขึ้นเพื่อผลที่แม่นยำ'; }
+    if(r.more){
+      st.style.display='block';
+      st.textContent='แสดง '+ROWS.length+' รายการแรก (ยังมีอีก '+r.more+' รายการ) — พิมพ์คำค้นให้เจาะจงขึ้นเพื่อผลที่แม่นยำ';
+    }
   }catch(e){ st.textContent='เชื่อมต่อไม่สำเร็จ: '+e.message; }
 }
 
 /* ---------- สร้างเกียรติบัตร ---------- */
-let TPL = null;   // {img, w, h}
+let TPL=null;
 async function loadTemplate(){
-  if (TPL) return TPL;
-  const r = await jsonp({action:'certTemplate'});
-  if (!r || !r.ok) throw new Error((r && r.message) || 'ยังไม่ได้ตั้งค่าเทมเพลตเกียรติบัตร');
-  const img = new Image();
+  if(TPL) return TPL;
+  const r = await jsonp({action:'certTemplate', act:ACT});
+  if(!r || !r.ok) throw new Error((r&&r.message)||'กิจกรรมนี้ยังไม่ได้ตั้งค่าพื้นหลังเกียรติบัตร');
+  const img=new Image();
   await new Promise((ok,no)=>{
-    img.onload=ok; img.onerror=()=>no(new Error('เปิดไฟล์เทมเพลตไม่สำเร็จ'));
+    img.onload=ok; img.onerror=()=>no(new Error('เปิดไฟล์พื้นหลังไม่สำเร็จ'));
     img.src='data:'+(r.mime||'image/png')+';base64,'+r.data;
   });
-  TPL = { img:img, w:img.naturalWidth, h:img.naturalHeight };
+  TPL={img:img,w:img.naturalWidth,h:img.naturalHeight};
   return TPL;
 }
-
-/* วาดข้อความ 1 บรรทัด ย่อขนาดอัตโนมัติถ้ายาวเกินกรอบ */
-function drawLine(ctx, text, cfg, W, H){
-  if (!text) return;
-  let size = cfg.size * H;
-  const maxW = (cfg.max || .8) * W;
-  ctx.textAlign = cfg.align || 'center';
-  ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = cfg.color || '#000';
-  for (let i=0; i<40; i++){
-    ctx.font = (cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
-    if (ctx.measureText(text).width <= maxW || size < 10) break;
-    size *= 0.96;
+function drawLine(ctx,text,cfg,W,H){
+  if(!text) return;
+  let size=cfg.size*H; const maxW=(cfg.max||.8)*W;
+  ctx.textAlign=cfg.align||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=cfg.color||'#000';
+  for(let i=0;i<40;i++){
+    ctx.font=(cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
+    if(ctx.measureText(text).width<=maxW || size<10) break;
+    size*=0.96;
   }
-  ctx.fillText(text, cfg.x*W, cfg.y*H);
+  ctx.fillText(text,cfg.x*W,cfg.y*H);
+}
+function drawWrap(ctx,text,cfg,W,H){
+  if(!text) return;
+  const maxW=(cfg.max||.8)*W, maxLines=cfg.lines||1;
+  let size=cfg.size*H, lines=[];
+  ctx.textAlign=cfg.align||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=cfg.color||'#000';
+  for(let a=0;a<40;a++){
+    ctx.font=(cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
+    lines=[]; let cur='';
+    for(const w of String(text).split(/(\s+)/)){
+      const t=cur+w;
+      if(ctx.measureText(t).width>maxW && cur.trim()){ lines.push(cur.trim()); cur=w.trim()?w:''; }
+      else cur=t;
+    }
+    if(cur.trim()) lines.push(cur.trim());
+    if(lines.length<=maxLines || size<10) break;
+    size*=0.94;
+  }
+  if(lines.length>maxLines){ lines=lines.slice(0,maxLines); lines[maxLines-1]+='…'; }
+  const lh=size*1.28, y0=cfg.y*H-(lines.length-1)*lh/2;
+  lines.forEach((ln,i)=>ctx.fillText(ln,cfg.x*W,y0+i*lh));
 }
 
-/* วาดข้อความหลายบรรทัด (ตัดคำตามความกว้าง) */
-function drawWrap(ctx, text, cfg, W, H){
-  if (!text) return;
-  const maxW = (cfg.max||.8)*W, maxLines = cfg.lines || 1;
-  let size = cfg.size*H;
-  ctx.textAlign = cfg.align||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle = cfg.color||'#000';
-  let lines = [];
-  for (let attempt=0; attempt<40; attempt++){
-    ctx.font = (cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
-    lines = []; let cur = '';
-    const words = String(text).split(/(\s+)/);
-    for (const w of words){
-      const t = cur + w;
-      if (ctx.measureText(t).width > maxW && cur.trim()){ lines.push(cur.trim()); cur = w.trim()? w : ''; }
-      else cur = t;
-    }
-    if (cur.trim()) lines.push(cur.trim());
-    if (lines.length <= maxLines || size < 10) break;
-    size *= 0.94;
-  }
-  if (lines.length > maxLines){ lines = lines.slice(0,maxLines); lines[maxLines-1] += '…'; }
-  const lh = size*1.28, y0 = cfg.y*H - (lines.length-1)*lh/2;
-  lines.forEach((ln,i)=> ctx.fillText(ln, cfg.x*W, y0 + i*lh));
+/* PDF: ประกอบไฟล์เอง ฝัง JPEG ตรง ๆ — ไม่ต้องพึ่งไลบรารีจากภายนอก */
+function jpegToPdf(jpegBytes, wPx, hPx){
+  const land = wPx >= hPx;
+  const PW = land ? 841.89 : 595.28, PH = land ? 595.28 : 841.89;   // A4 (points)
+  const enc = new TextEncoder();
+  const parts = [], offs = [];
+  let len = 0;
+  const push = u8 => { parts.push(u8); len += u8.length; };
+  const txt  = s => push(enc.encode(s));
+
+  txt('%PDF-1.4\n');
+  const obj = (n, body) => { offs[n] = len; txt(n+' 0 obj\n'+body+'\nendobj\n'); };
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW.toFixed(2)+' '+PH.toFixed(2)+']'
+       + ' /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
+  const content = 'q\n'+PW.toFixed(2)+' 0 0 '+PH.toFixed(2)+' 0 0 cm\n/Im0 Do\nQ\n';
+  obj(4, '<< /Length '+enc.encode(content).length+' >>\nstream\n'+content+'endstream');
+
+  offs[5] = len;
+  txt('5 0 obj\n<< /Type /XObject /Subtype /Image /Width '+wPx+' /Height '+hPx
+    + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpegBytes.length+' >>\nstream\n');
+  push(jpegBytes);
+  txt('\nendstream\nendobj\n');
+
+  const xref = len;
+  let x = 'xref\n0 6\n0000000000 65535 f \n';
+  for(let i=1;i<=5;i++) x += ('0000000000'+offs[i]).slice(-10)+' 00000 n \n';
+  txt(x + 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+
+  const out = new Uint8Array(len); let p = 0;
+  parts.forEach(u => { out.set(u, p); p += u.length; });
+  return new Blob([out], { type:'application/pdf' });
 }
 
 async function makeCert(row, btn){
   const old = btn.textContent;
   btn.disabled = true; btn.innerHTML = '<i class="spin"></i>กำลังสร้าง…';
   try{
-    await (document.fonts ? document.fonts.load('800 100px Sarabun') : Promise.resolve());
-    if (document.fonts) await document.fonts.ready;
+    if(document.fonts){ await document.fonts.load('800 100px Sarabun'); await document.fonts.ready; }
     const t = await loadTemplate();
     const cv = document.getElementById('cv');
     cv.width = t.w; cv.height = t.h;
@@ -399,15 +460,19 @@ async function makeCert(row, btn){
 
     drawLine(ctx, row.name, LAYOUT.name, t.w, t.h);
     drawLine(ctx, pre(PREFIXTXT.school, row.school), LAYOUT.school, t.w, t.h);
-    drawWrap(ctx, (PREFIXTXT.title||'') + row.title + (PREFIXTXT.titleSuffix||''), LAYOUT.title, t.w, t.h);
-    drawLine(ctx, (PREFIXTXT.award||'') + row.award, LAYOUT.award, t.w, t.h);
-    drawLine(ctx, (PREFIXTXT.certNo||'') + row.certNo, LAYOUT.certNo, t.w, t.h);
+    if(row.title) drawWrap(ctx, PREFIXTXT.title+row.title+PREFIXTXT.titleSuffix, LAYOUT.title, t.w, t.h);
+    drawLine(ctx, PREFIXTXT.award + row.award, LAYOUT.award, t.w, t.h);
+    drawLine(ctx, PREFIXTXT.certNo + row.certNo, LAYOUT.certNo, t.w, t.h);
 
-    const land = t.w >= t.h;
-    const pdf = new window.jspdf.jsPDF({ orientation: land?'landscape':'portrait', unit:'mm', format:'a4' });
-    const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
-    pdf.addImage(cv.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, pw, ph, undefined, 'FAST');
-    pdf.save('เกียรติบัตร-' + (row.refCode||'') + '-' + String(row.name||'').replace(/\s+/g,'') + '.pdf');
+    const blob = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.94));
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    const pdf = jpegToPdf(bytes, t.w, t.h);
+    const url = URL.createObjectURL(pdf);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'เกียรติบัตร-' + (row.certNo||'').replace(/[\\/]/g,'-') + '-' + String(row.name||'').replace(/\s+/g,'') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
   }catch(e){
     alert('สร้างเกียรติบัตรไม่สำเร็จ: ' + e.message);
   }
@@ -416,6 +481,8 @@ async function makeCert(row, btn){
 
 document.getElementById('go').addEventListener('click', doSearch);
 document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+document.getElementById('act').addEventListener('change', loadAct);
+document.getElementById('ptype').addEventListener('change', doSearch);
 boot();
 </script>
 </body>
