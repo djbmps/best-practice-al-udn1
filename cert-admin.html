@@ -344,7 +344,11 @@ function render(acts){
       +       '<span>รายชื่อ '+a.n+' คน</span>'
       +       '<span>'+(a.hasTpl ? '🖼 มีพื้นหลังแล้ว' : '⚠️ ยังไม่มีพื้นหลัง')+'</span>'
       +       '<span>เปิด '+thDate(a.openAt)+'</span></div></div>'
-      +   '<div class="acts-r">'+statusPill(a)+'<button class="btn btn-ghost btn-sm tg">จัดการ</button></div>'
+      +   '<div class="acts-r">'+statusPill(a)
+      +     '<button class="btn btn-sm '+(a.status==='เปิด'?'btn-ghost':'btn-main')+' pw2" '
+      +       'title="'+(a.status==='เปิด'?'ปิดไม่ให้ครูค้นหา':'เปิดให้ครูค้นหา')+'">'
+      +       (a.status==='เปิด'?'⏸ ปิดระบบ':'▶ เปิดระบบ')+'</button>'
+      +     '<button class="btn btn-ghost btn-sm tg">จัดการ</button></div>'
       + '</div>'
       + '<div class="b">'+bodyHtml(a,i)+'</div></div>';
   }).join('');
@@ -370,10 +374,12 @@ function bodyHtml(a,i){
   +  '<div class="tplbox">'
   +   (a.hasTpl ? '<img class="tplimg" alt="พื้นหลังเกียรติบัตร" data-act="'+esc(a.code)+'">' : '')
   +   '<div><div class="hint" style="margin:0">'
-  +     (a.hasTpl ? 'ไฟล์ปัจจุบัน: <b>'+esc(a.tplName||'-')+'</b><br>' : '')
-  +     'รองรับ PNG / JPG ขนาดไม่เกิน 10 MB · แนะนำแนวนอน A4 ด้านกว้าง 3500 px<br>อัปใหม่ทับได้ตลอด ไฟล์เดิมจะถูกแทนที่</div>'
+  +     (a.hasTpl ? '✅ ไฟล์ปัจจุบัน: <b>'+esc(a.tplName||'-')+'</b><br>' : '⚠️ ยังไม่มีไฟล์พื้นหลัง ครูจะกดโหลดเกียรติบัตรไม่ได้<br>')
+  +     'ชื่อกิจกรรมและข้อความประจำต่าง ๆ ให้ออกแบบมาในไฟล์พื้นหลังได้เลย<br>'
+  +     'รองรับ PNG / JPG ไม่เกิน 10 MB · แนะนำแนวนอน A4 ด้านกว้าง 2000 px ขึ้นไป<br>'
+  +     '<b>พื้นหลังผิด? เลือกไฟล์ใหม่แล้วกดอัปโหลดทับได้เลย</b> ไฟล์เดิมจะถูกแทนที่ทันที</div>'
   +    '<div class="row"><input type="file" class="f-tpl" accept="image/png,image/jpeg" style="max-width:320px">'
-  +     '<button class="btn btn-main btn-sm up">อัปโหลดพื้นหลัง</button></div>'
+  +     '<button class="btn btn-main btn-sm up">'+(a.hasTpl?'เปลี่ยนพื้นหลัง':'อัปโหลดพื้นหลัง')+'</button></div>'
   +   '</div>'
   +  '</div>'
   + '</div>'
@@ -395,6 +401,10 @@ function bodyHtml(a,i){
   + '</div>'
 
   + '<div class="sect"><h4>📤 อัปรายชื่อผู้รับเกียรติบัตร</h4>'
+  +  '<div class="row" style="margin-bottom:10px">'
+  +   '<button class="btn btn-ghost btn-sm dl">⬇ ดาวน์โหลดไฟล์ตัวอย่างสำหรับกรอก</button>'
+  +   '<span class="hint" style="margin:0">เปิดด้วย Excel หรือ Google Sheet กรอกแล้วคัดลอกมาวางในช่องด้านล่าง</span>'
+  +  '</div>'
   +  '<div class="fl"><label>วางข้อมูลจาก Excel / Google Sheet (คัดลอกทั้งบล็อกรวมหัวตาราง แล้ววางที่นี่)</label>'
   +   '<textarea class="f-rows" placeholder="เลขเกียรติบัตร&#9;ปี&#9;ชื่อ-สกุล&#9;ตำแหน่ง/โรงเรียน&#9;รางวัล&#9;ประเภท&#10;สพป.อด.1-8324&#9;/2569&#9;นายพิชัย แก้วเมือง&#9;ครู โรงเรียนบ้านโพนงามหนองตุ&#9;รองชนะเลิศอันดับ 1 ระดับดีเยี่ยม&#9;ประเภทผู้สร้างสื่อเทคโนโลยีดิจิทัล"></textarea>'
   +   '<div class="hint"><b>วางทั้งตารางพร้อมหัวตารางได้เลย</b> ระบบจะจับคู่คอลัมน์ให้อัตโนมัติ — รองรับหัวตาราง: '
@@ -484,6 +494,26 @@ function parseRows(text){
   return out;
 }
 
+/* ---------- ไฟล์ตัวอย่างสำหรับกรอกรายชื่อ ---------- */
+const TPL_ROWS = [
+  ['เลขเกียรติบัตร','ปี','ชื่อ-สกุล','ตำแหน่ง/โรงเรียน','รางวัล','ประเภท'],
+  ['สพป.อด.1-0001','/2569','นายพิชัย แก้วเมือง','ครู โรงเรียนบ้านโพนงามหนองตุ','ชนะเลิศ ระดับดีเยี่ยม','ประเภทผู้สร้างสื่อเทคโนโลยีดิจิทัล'],
+  ['สพป.อด.1-0002','/2569','นางสาวลลิตา ชัยภิบาล','ครู โรงเรียนบ้านหนองขุ่นเหล่าหลักวิทยา','รองชนะเลิศอันดับ 1 ระดับดีเยี่ยม','ประเภทผู้สร้างสื่อเทคโนโลยีดิจิทัล'],
+  ['สพป.อด.1-0003','/2569','นางสาวดวงใจ บุญมีประเสริฐ','ศึกษานิเทศก์','ระดับดีเยี่ยม','ประเภทผู้สร้างนวัตกรรมการนิเทศ'],
+  ['สพป.อด.1-0004','/2569','นายชัยณรงค์ พ่อทอง','ผู้อำนวยการโรงเรียนบ้านสร้างแป้น','ระดับดีมาก','ประเภทผู้ขับเคลื่อนระดับสถานศึกษา']
+];
+function downloadTemplate(){
+  const csv = TPL_ROWS.map(function(r){
+    return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
+  }).join('\r\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});   // BOM ให้ Excel อ่านภาษาไทยถูก
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'แบบฟอร์มรายชื่อเกียรติบัตร.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
 /* ---------- รูปแบบข้อความบนเกียรติบัตร ---------- */
 const PRESETS = {
   std: { fields:[
@@ -556,6 +586,25 @@ function wire(){
   document.querySelectorAll('.act').forEach(function(el){
     const a = ACTS[+el.dataset.i];
     const q = s => el.querySelector(s);
+
+    /* ปุ่มเปิด/ปิดเร็ว — ไม่ต้องเปิดแผงตั้งค่า */
+    q('.pw2').addEventListener('click', async function(){
+      const on = a.status !== 'เปิด';
+      if(on && !a.hasTpl && !confirm('กิจกรรมนี้ยังไม่มีไฟล์พื้นหลัง\n\nถ้าเปิดตอนนี้ ครูจะค้นเจอชื่อแต่กดโหลดเกียรติบัตรไม่ได้\nยืนยันเปิดหรือไม่?')) return;
+      if(on && a.n === 0 && !confirm('กิจกรรมนี้ยังไม่มีรายชื่อสักคน\n\nยืนยันเปิดหรือไม่?')) return;
+      if(!on && !confirm('ปิดกิจกรรม "'+a.name+'" ?\n\nครูจะค้นหาและดาวน์โหลดเกียรติบัตรของกิจกรรมนี้ไม่ได้ชั่วคราว\nข้อมูลรายชื่อยังอยู่ครบ เปิดใหม่เมื่อไรก็ได้')) return;
+      this.disabled = true; const o = this.textContent; this.textContent = 'กำลังบันทึก...';
+      try{
+        const r = await call({action:'actSave', token:TOKEN, code:a.code,
+          name:a.name, year:a.year||'', openAt:a.openAt||'',
+          status: on ? 'เปิด' : 'ปิด', note:a.note||''});
+        if(r.ok){ await reload(); return; }
+        alert(r.message||'บันทึกไม่สำเร็จ');
+      }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
+      this.disabled = false; this.textContent = o;
+    });
+
+    q('.dl').addEventListener('click', function(){ downloadTemplate(); });
 
     q('.tg').addEventListener('click', function(){
       el.classList.toggle('open');
