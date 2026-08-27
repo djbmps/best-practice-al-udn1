@@ -192,28 +192,47 @@ body{
 
 <canvas id="cv" style="display:none"></canvas>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzVC7Kdik8erhvEDzU5UGtnWxTzQjkgfkbHiXQyAfsiM5kXI-7I6TlGqL2er1yyeOjL/exec";
 
 /* ============================================================
  *  ตำแหน่งข้อความบนเกียรติบัตร (สัดส่วน 0–1 ของขนาดภาพ)
  * ============================================================ */
-const LAYOUT = {
-  name:    { x:.500, y:.470, size:.062, weight:800, color:'#1a1a1a', align:'center', max:.72 },
-  school:  { x:.500, y:.560, size:.034, weight:600, color:'#333333', align:'center', max:.76 },
-  title:   { x:.500, y:.632, size:.028, weight:400, color:'#444444', align:'center', max:.78, lines:2 },
-  award:   { x:.500, y:.712, size:.036, weight:700, color:'#8a6d1f', align:'center', max:.70 },
-  certNo:  { x:.500, y:.828, size:.020, weight:400, color:'#666666', align:'center', max:.50 }
-};
-const PREFIXTXT = {
-  school:'โรงเรียน', title:'ผลงาน “', titleSuffix:'”',
-  award:'ได้รับรางวัลระดับ ', certNo:'เลขที่ '
-};
+/* แต่ละบรรทัด: t = ข้อความ ใส่ตัวแปรในวงเล็บปีกกา เช่น "{name}" หรือ "{award}  {ptype}"
+ * x,y = ตำแหน่ง (0–1) · s = ขนาดตัวอักษรเทียบความสูงภาพ · w = ความหนา
+ * c = สี · a = การจัดวาง (left/center/right) · mx = ความกว้างสูงสุด · ln = จำนวนบรรทัด
+ * ตัวแปรที่ใช้ได้: {certNo} {refCode} {ptype} {title} {name} {position} {school} {schoolGroup} {award} {score} */
+const LAYOUT_DEFAULT = { fields: [
+  { t:'{name}',                x:.500, y:.470, s:.062, w:800, c:'#1a1a1a', a:'center', mx:.72 },
+  { t:'โรงเรียน{school}',       x:.500, y:.560, s:.034, w:600, c:'#333333', a:'center', mx:.76 },
+  { t:'ผลงาน “{title}”',        x:.500, y:.632, s:.028, w:400, c:'#444444', a:'center', mx:.78, ln:2 },
+  { t:'ได้รับรางวัลระดับ {award}', x:.500, y:.712, s:.036, w:700, c:'#8a6d1f', a:'center', mx:.70 },
+  { t:'เลขที่ {certNo}',         x:.500, y:.828, s:.020, w:400, c:'#666666', a:'center', mx:.50 }
+]};
 
 /* ---------- helper ---------- */
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function pre(p, v){ const t=String(v||'').trim(); if(!t) return ''; if(!p) return t; return t.indexOf(p)===0 ? t : (p+t); }
+/* แทนค่าตัวแปร — ถ้าตัวแปรทุกตัวว่าง จะไม่วาดบรรทัดนั้น
+   และถ้าค่าขึ้นต้นด้วยคำนำหน้าอยู่แล้ว (เช่น "โรงเรียนบ้านนาดี") จะไม่ใส่ซ้ำ */
+function fill(tpl, row){
+  let any = false, dup = false;
+  const s = String(tpl).replace(/\{(\w+)\}/g, (m, k) => {
+    let v = String(row[k]==null ? '' : row[k]).trim();
+    if(v) any = true;
+    return v;
+  });
+  if(!any) return '';
+  // กันคำซ้ำ เช่น "โรงเรียนโรงเรียนบ้านนาดี"
+  return s.replace(/(โรงเรียน|ผลงาน\s|เลขที่\s)\1/g, '$1').replace(/ {3,}/g,'  ').trim();
+}
+function normLayout(raw){
+  try{
+    const o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const f = o && (o.fields || o);
+    if(Array.isArray(f) && f.length) return { fields:f };
+  }catch(e){}
+  return LAYOUT_DEFAULT;
+}
 function awardClass(a){
   const s=String(a||'');
   if(/ทอง(?!แดง)|gold/i.test(s)) return 'g';
@@ -269,7 +288,7 @@ function showPending(openAt, actName){
 }
 
 /* ---------- โหลดรายการกิจกรรม ---------- */
-let ROWS=[], ACT='';
+let ROWS=[], ACT='', ACTS={}, LAY=LAYOUT_DEFAULT;
 async function boot(){
   try{
     const r = await jsonp({action:'certStatus'});
@@ -285,6 +304,7 @@ async function boot(){
     }
     document.getElementById('pendBox').style.display='none';
     document.getElementById('mainBox').style.display='block';
+    live.forEach(a => { ACTS[a.code] = a; });
     const sel=document.getElementById('act');
     sel.innerHTML = live.map(a =>
       '<option value="'+esc(a.code)+'">'+esc(a.name)+(a.year?' · '+esc(a.year):'')+' ('+a.n+')</option>').join('');
@@ -300,6 +320,7 @@ async function boot(){
 async function loadAct(){
   ACT = document.getElementById('act').value || ACT;
   TPL = null;
+  LAY = normLayout(ACTS[ACT] && ACTS[ACT].layout);
   document.getElementById('hits').innerHTML='';
   const st=document.getElementById('state'); st.style.display='block';
   st.textContent='เลือกประเภทผลงาน หรือพิมพ์คำค้นด้านบนเพื่อเริ่มค้นหา';
@@ -352,11 +373,15 @@ async function doSearch(){
       +   (r2.refCode ? '<span>รหัส '+esc(r2.refCode)+'</span>' : '')
       + '</div>'
       + '<div class="act">'
-      +   '<button type="button" class="btn btn-main btn-sm" data-i="'+i+'">⬇ ดาวน์โหลดเกียรติบัตร</button>'
+      +   '<button type="button" class="btn btn-main btn-sm" data-i="'+i+'">⬇ ดาวน์โหลด PDF</button>'
+      +   '<button type="button" class="btn btn-ghost btn-sm" data-p="'+i+'">🖨 พิมพ์เลย</button>'
       +   '<span class="certno">เลขที่ '+esc(r2.certNo)+'</span>'
       + '</div></div>').join('');
     hits.querySelectorAll('button[data-i]').forEach(b=>{
-      b.addEventListener('click', ()=>makeCert(ROWS[+b.dataset.i], b));
+      b.addEventListener('click', ()=>makeCert(ROWS[+b.dataset.i], b, 'download'));
+    });
+    hits.querySelectorAll('button[data-p]').forEach(b=>{
+      b.addEventListener('click', ()=>makeCert(ROWS[+b.dataset.p], b, 'print'));
     });
     if(r.more){
       st.style.display='block';
@@ -379,37 +404,30 @@ async function loadTemplate(){
   TPL={img:img,w:img.naturalWidth,h:img.naturalHeight};
   return TPL;
 }
-function drawLine(ctx,text,cfg,W,H){
+/* วาดข้อความ 1 บรรทัด (หรือหลายบรรทัดถ้ากำหนด ln) ตามค่าใน layout */
+function drawField(ctx,text,f,W,H){
   if(!text) return;
-  let size=cfg.size*H; const maxW=(cfg.max||.8)*W;
-  ctx.textAlign=cfg.align||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=cfg.color||'#000';
-  for(let i=0;i<40;i++){
-    ctx.font=(cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
-    if(ctx.measureText(text).width<=maxW || size<10) break;
-    size*=0.96;
-  }
-  ctx.fillText(text,cfg.x*W,cfg.y*H);
-}
-function drawWrap(ctx,text,cfg,W,H){
-  if(!text) return;
-  const maxW=(cfg.max||.8)*W, maxLines=cfg.lines||1;
-  let size=cfg.size*H, lines=[];
-  ctx.textAlign=cfg.align||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=cfg.color||'#000';
-  for(let a=0;a<40;a++){
-    ctx.font=(cfg.weight||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
+  const maxW=(f.mx||.8)*W, maxLines=f.ln||1;
+  let size=(f.s||.04)*H, lines=[];
+  ctx.textAlign=f.a||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=f.c||'#000';
+  for(let a=0;a<60;a++){
+    ctx.font=(f.w||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
     lines=[]; let cur='';
-    for(const w of String(text).split(/(\s+)/)){
-      const t=cur+w;
-      if(ctx.measureText(t).width>maxW && cur.trim()){ lines.push(cur.trim()); cur=w.trim()?w:''; }
+    for(const wd of String(text).split(/(\s+)/)){
+      const t=cur+wd;
+      if(ctx.measureText(t).width>maxW && cur.trim()){ lines.push(cur.trim()); cur=wd.trim()?wd:''; }
       else cur=t;
     }
     if(cur.trim()) lines.push(cur.trim());
     if(lines.length<=maxLines || size<10) break;
-    size*=0.94;
+    size*=0.95;
   }
   if(lines.length>maxLines){ lines=lines.slice(0,maxLines); lines[maxLines-1]+='…'; }
-  const lh=size*1.28, y0=cfg.y*H-(lines.length-1)*lh/2;
-  lines.forEach((ln,i)=>ctx.fillText(ln,cfg.x*W,y0+i*lh));
+  const lh=size*1.30, y0=(f.y||.5)*H-(lines.length-1)*lh/2;
+  lines.forEach((ln,i)=>ctx.fillText(ln,(f.x==null?.5:f.x)*W,y0+i*lh));
+}
+function drawCert(ctx,row,lay,W,H){
+  (lay.fields||[]).forEach(f => drawField(ctx, fill(f.t, row), f, W, H));
 }
 
 /* PDF: ประกอบไฟล์เอง ฝัง JPEG ตรง ๆ — ไม่ต้องพึ่งไลบรารีจากภายนอก */
@@ -447,32 +465,56 @@ function jpegToPdf(jpegBytes, wPx, hPx){
   return new Blob([out], { type:'application/pdf' });
 }
 
-async function makeCert(row, btn){
+/* สั่งพิมพ์ทันที — วางภาพเกียรติบัตรเต็มหน้ากระดาษ A4 */
+function printImage(dataUrl, land){
+  const old = document.getElementById('prtFrame');
+  if(old) old.remove();
+  const fr = document.createElement('iframe');
+  fr.id='prtFrame';
+  fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  const d = fr.contentWindow.document;
+  d.open();
+  d.write('<!doctype html><meta charset="utf-8"><style>'
+    + '@page{size:A4 '+(land?'landscape':'portrait')+';margin:0}'
+    + 'html,body{margin:0;padding:0;height:100%}'
+    + 'img{display:block;width:100%;height:100%;object-fit:contain}'
+    + '</style><img src="'+dataUrl+'">');
+  d.close();
+  const img = d.querySelector('img');
+  const go = ()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){ alert('สั่งพิมพ์ไม่สำเร็จ: '+e.message); } };
+  if(img.complete) setTimeout(go, 250); else img.onload = ()=>setTimeout(go, 250);
+}
+
+async function makeCert(row, btn, mode){
   const old = btn.textContent;
   btn.disabled = true; btn.innerHTML = '<i class="spin"></i>กำลังสร้าง…';
   try{
-    if(document.fonts){ await document.fonts.load('800 100px Sarabun'); await document.fonts.ready; }
+    if(document.fonts){
+      await Promise.all(['400','600','700','800'].map(w=>document.fonts.load(w+' 100px Sarabun')));
+      await document.fonts.ready;
+    }
     const t = await loadTemplate();
     const cv = document.getElementById('cv');
     cv.width = t.w; cv.height = t.h;
     const ctx = cv.getContext('2d');
     ctx.drawImage(t.img, 0, 0, t.w, t.h);
 
-    drawLine(ctx, row.name, LAYOUT.name, t.w, t.h);
-    drawLine(ctx, pre(PREFIXTXT.school, row.school), LAYOUT.school, t.w, t.h);
-    if(row.title) drawWrap(ctx, PREFIXTXT.title+row.title+PREFIXTXT.titleSuffix, LAYOUT.title, t.w, t.h);
-    drawLine(ctx, PREFIXTXT.award + row.award, LAYOUT.award, t.w, t.h);
-    drawLine(ctx, PREFIXTXT.certNo + row.certNo, LAYOUT.certNo, t.w, t.h);
+    drawCert(ctx, row, LAY, t.w, t.h);
 
-    const blob = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.94));
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    const pdf = jpegToPdf(bytes, t.w, t.h);
-    const url = URL.createObjectURL(pdf);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'เกียรติบัตร-' + (row.certNo||'').replace(/[\\/]/g,'-') + '-' + String(row.name||'').replace(/\s+/g,'') + '.pdf';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    if(mode === 'print'){
+      printImage(cv.toDataURL('image/jpeg', 0.94), t.w >= t.h);
+    } else {
+      const blob = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', 0.94));
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const pdf = jpegToPdf(bytes, t.w, t.h);
+      const url = URL.createObjectURL(pdf);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'เกียรติบัตร-' + (row.certNo||'').replace(/[\\/]/g,'-') + '-' + String(row.name||'').replace(/\s+/g,'') + '.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    }
   }catch(e){
     alert('สร้างเกียรติบัตรไม่สำเร็จ: ' + e.message);
   }
