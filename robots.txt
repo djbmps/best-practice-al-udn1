@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /best-practice-al-udn1/admin.html
+Disallow: /best-practice-al-udn1/cert-admin.html
