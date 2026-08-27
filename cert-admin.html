@@ -378,11 +378,29 @@ function bodyHtml(a,i){
   +  '</div>'
   + '</div>'
 
+  + '<div class="sect"><h4>🎨 ตำแหน่งข้อความบนเกียรติบัตร</h4>'
+  +  '<div class="row" style="margin-bottom:10px">'
+  +   '<button class="btn btn-ghost btn-sm pz" data-p="std">ใช้แบบมาตรฐาน</button>'
+  +   '<button class="btn btn-ghost btn-sm pz" data-p="obec">ใช้แบบ OBEC Content Center</button>'
+  +   '<button class="btn btn-ghost btn-sm pv">🔍 ดูตัวอย่าง</button>'
+  +  '</div>'
+  +  '<div class="fl"><label>ค่าตำแหน่ง (JSON) — เว้นว่างไว้ = ใช้แบบมาตรฐาน</label>'
+  +   '<textarea class="f-lay" spellcheck="false" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;min-height:150px">'+esc(a.layout||'')+'</textarea>'
+  +   '<div class="hint">แต่ละบรรทัดคือข้อความ 1 บรรทัดบนเกียรติบัตร · '
+  +     '<b>t</b>=ข้อความ (ใส่ตัวแปรในวงเล็บปีกกา) · <b>x,y</b>=ตำแหน่ง 0–1 · <b>s</b>=ขนาดเทียบความสูงภาพ · '
+  +     '<b>w</b>=ความหนา · <b>c</b>=สี · <b>a</b>=left/center/right · <b>mx</b>=ความกว้างสูงสุด · <b>ln</b>=จำนวนบรรทัด<br>'
+  +     'ตัวแปรที่ใช้ได้: <b>{certNo} {refCode} {name} {position} {school} {schoolGroup} {ptype} {title} {award} {score}</b> · '
+  +     'ตัวแปรที่ไม่มีข้อมูล บรรทัดนั้นจะไม่ถูกพิมพ์<br>กด “ดูตัวอย่าง” เพื่อทดลองวางข้อความบนพื้นหลังจริง แล้วกด “บันทึกการตั้งค่า” ด้านบนเพื่อจัดเก็บ</div></div>'
+  +  '<canvas class="lay-pv" style="display:none;width:100%;max-width:620px;margin-top:12px;border-radius:12px;border:1px solid var(--line)"></canvas>'
+  + '</div>'
+
   + '<div class="sect"><h4>📤 อัปรายชื่อผู้รับเกียรติบัตร</h4>'
-  +  '<div class="fl"><label>วางข้อมูลจาก Excel (คัดลอกทั้งบล็อกแล้ววางที่นี่) หรือพิมพ์แบบคั่นด้วย Tab / จุลภาค</label>'
-  +   '<textarea class="f-rows" placeholder="คำนำหน้า&#9;ชื่อ - สกุล&#9;ตำแหน่ง&#9;โรงเรียน&#9;กลุ่มโรงเรียน&#9;ประเภท/หมวด&#9;ชื่อผลงาน&#9;ระดับรางวัล&#9;คะแนน&#10;นาง&#9;สุนิสา ปัญญาดี&#9;ครูชำนาญการพิเศษ&#9;โรงเรียนอนุบาลอุดรธานี&#9;กลุ่มเมือง 1&#9;Active Learning&#9;การจัดการเรียนรู้เชิงรุก 5E&#9;ทอง&#9;92"></textarea>'
-  +   '<div class="hint">ลำดับคอลัมน์: <b>คำนำหน้า · ชื่อ-สกุล · ตำแหน่ง · โรงเรียน · กลุ่มโรงเรียน · ประเภท/หมวด · ชื่อผลงาน · ระดับรางวัล · คะแนน</b><br>'
-  +     'บรรทัดแรกเป็นหัวตารางได้ ระบบจะข้ามให้เอง · ช่องที่ไม่มีข้อมูลเว้นว่างไว้ได้ · ระดับรางวัลที่เว้นว่างจะถือว่า “เข้าร่วม”</div></div>'
+  +  '<div class="fl"><label>วางข้อมูลจาก Excel / Google Sheet (คัดลอกทั้งบล็อกรวมหัวตาราง แล้ววางที่นี่)</label>'
+  +   '<textarea class="f-rows" placeholder="เลขเกียรติบัตร&#9;ปี&#9;ชื่อ-สกุล&#9;ตำแหน่ง/โรงเรียน&#9;รางวัล&#9;ประเภท&#10;สพป.อด.1-8324&#9;/2569&#9;นายพิชัย แก้วเมือง&#9;ครู โรงเรียนบ้านโพนงามหนองตุ&#9;รองชนะเลิศอันดับ 1 ระดับดีเยี่ยม&#9;ประเภทผู้สร้างสื่อเทคโนโลยีดิจิทัล"></textarea>'
+  +   '<div class="hint"><b>วางทั้งตารางพร้อมหัวตารางได้เลย</b> ระบบจะจับคู่คอลัมน์ให้อัตโนมัติ — รองรับหัวตาราง: '
+  +     'เลขเกียรติบัตร · ปี · คำนำหน้า · ชื่อ-สกุล · ตำแหน่ง/โรงเรียน · โรงเรียน · กลุ่มโรงเรียน · ประเภท · ชื่อผลงาน · รางวัล · คะแนน<br>'
+  +     'ถ้าไม่มีหัวตาราง จะใช้ลำดับ: คำนำหน้า · ชื่อ-สกุล · ตำแหน่ง · โรงเรียน · กลุ่มโรงเรียน · ประเภท/หมวด · ชื่อผลงาน · ระดับรางวัล · คะแนน<br>'
+  +     'ถ้ามีคอลัมน์เลขเกียรติบัตร ระบบจะใช้เลขนั้น ถ้าไม่มีจะออกเลขให้อัตโนมัติ · ระดับรางวัลที่เว้นว่างจะถือว่า “เข้าร่วม”</div></div>'
   +  '<div class="row"><button class="btn btn-main btn-sm addr">เพิ่มเข้ารายชื่อ</button>'
   +   '<button class="btn btn-ghost btn-sm rep">แทนที่รายชื่อทั้งหมด</button>'
   +   '<button class="btn btn-ghost btn-sm clr" style="color:#9f1239;border-color:#fecdd3">ล้างรายชื่อ ('+a.n+')</button></div>'
@@ -395,19 +413,142 @@ function toLocalInput(iso){
   return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
 }
 
-/* ---------- แปลงข้อความที่วางมาเป็นรายชื่อ ---------- */
+/* ---------- แปลงข้อความที่วางมาเป็นรายชื่อ ----------
+ * ถ้าบรรทัดแรกเป็นหัวตาราง จะจับคู่คอลัมน์ตามชื่อหัวให้อัตโนมัติ
+ * ถ้าไม่มีหัวตาราง จะใช้ลำดับมาตรฐาน (คำนำหน้า · ชื่อ-สกุล · ตำแหน่ง · โรงเรียน · …) */
+const COLMAP = [
+  ['certNo',     ['เลขที่เกียรติบัตร','เลขเกียรติบัตร','เลขที่','เลขที่ใบเกียรติบัตร','certno','certificateno']],
+  ['year',       ['ปี','ปีงบประมาณ','ปีการศึกษา','year']],
+  ['prefix',     ['คำนำหน้า','คำนำหน้าชื่อ','prefix']],
+  ['fullname',   ['ชื่อ-สกุล','ชื่อ–สกุล','ชื่อ - สกุล','ชื่อสกุล','ชื่อ-นามสกุล','ชื่อ','ชื่อผู้รับ','name','fullname']],
+  ['position',   ['ตำแหน่ง/โรงเรียน','ตำแหน่ง-โรงเรียน','ตำแหน่ง/หน่วยงาน','ตำแหน่ง','position']],
+  ['school',     ['โรงเรียน','สถานศึกษา','หน่วยงาน','school']],
+  ['schoolGroup',['กลุ่มโรงเรียน','กลุ่ม','ศูนย์เครือข่าย','เครือข่าย']],
+  ['ptype',      ['ประเภท/หมวด','ประเภทผลงาน','ประเภท','หมวด','type']],
+  ['title',      ['ชื่อผลงาน','ผลงาน','นวัตกรรม','title']],
+  ['award',      ['ระดับรางวัล','รางวัล','ผลการประเมิน','award']],
+  ['score',      ['คะแนน','score']],
+  ['refCode',    ['รหัสอ้างอิง','รหัส','refcode']]
+];
+const DEFORDER = ['prefix','fullname','position','school','schoolGroup','ptype','title','award','score'];
+function normHead(s){ return String(s||'').toLowerCase().replace(/[\s.·]/g,''); }
+function headMap(cells){
+  const map = {}; var hit = 0;
+  cells.forEach(function(h, i){
+    const n = normHead(h);
+    if(!n) return;
+    for(var k=0;k<COLMAP.length;k++){
+      const key = COLMAP[k][0];
+      if(map[key] != null) continue;
+      const alias = COLMAP[k][1];
+      for(var j=0;j<alias.length;j++){
+        if(n === normHead(alias[j])){ map[key] = i; hit++; return; }
+      }
+    }
+  });
+  return hit >= 2 ? map : null;
+}
+function splitCell(line){
+  return line.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(x=>x.trim().replace(/^"|"$/g,''));
+}
 function parseRows(text){
   const lines = String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return [];
+  var map = headMap(splitCell(lines[0])), start = 0;
+  if(map) start = 1;
   const out = [];
-  lines.forEach(function(ln, idx){
-    const c = ln.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(x=>x.trim().replace(/^"|"$/g,''));
-    if(idx===0 && /ชื่อ|สกุล|คำนำหน้า|name/i.test(c[0]+' '+(c[1]||''))) return;   // ข้ามหัวตาราง
-    const name = (c[1]||'').trim();
-    if(!name) return;
-    out.push({ prefix:c[0]||'', fullname:name, position:c[2]||'', school:c[3]||'',
-               schoolGroup:c[4]||'', ptype:c[5]||'', title:c[6]||'', award:c[7]||'', score:c[8]||'' });
-  });
+  for(var i=start;i<lines.length;i++){
+    const c = splitCell(lines[i]);
+    const g = function(k){
+      if(map) return map[k]==null ? '' : (c[map[k]]||'').trim();
+      const p = DEFORDER.indexOf(k);
+      return p < 0 ? '' : (c[p]||'').trim();
+    };
+    var name = g('fullname');
+    if(!name || /^(ชื่อ|name)/i.test(normHead(name))) continue;
+    var position = g('position'), school = g('school');
+    /* คอลัมน์รวม "ครู โรงเรียนบ้านนาดี" → แยกตำแหน่งกับโรงเรียนให้ */
+    if(!school && /โรงเรียน/.test(position)){
+      const at = position.indexOf('โรงเรียน');
+      school   = position.slice(at).trim();
+      position = position.slice(0, at).trim();
+    }
+    var certNo = g('certNo'), yr = g('year');
+    if(certNo && yr && certNo.indexOf('/') < 0){
+      certNo = certNo + (yr.charAt(0)==='/' ? yr : '/'+yr);
+    }
+    out.push({ certNo:certNo, refCode:g('refCode'), prefix:g('prefix'), fullname:name,
+               position:position, school:school, schoolGroup:g('schoolGroup'),
+               ptype:g('ptype'), title:g('title'), award:g('award'), score:g('score') });
+  }
   return out;
+}
+
+/* ---------- รูปแบบข้อความบนเกียรติบัตร ---------- */
+const PRESETS = {
+  std: { fields:[
+    { t:'{name}',                x:.500, y:.470, s:.062, w:800, c:'#1a1a1a', a:'center', mx:.72 },
+    { t:'โรงเรียน{school}',       x:.500, y:.560, s:.034, w:600, c:'#333333', a:'center', mx:.76 },
+    { t:'ผลงาน “{title}”',        x:.500, y:.632, s:.028, w:400, c:'#444444', a:'center', mx:.78, ln:2 },
+    { t:'ได้รับรางวัลระดับ {award}', x:.500, y:.712, s:.036, w:700, c:'#8a6d1f', a:'center', mx:.70 },
+    { t:'เลขที่ {certNo}',         x:.500, y:.828, s:.020, w:400, c:'#666666', a:'center', mx:.50 }
+  ]},
+  obec: { fields:[
+    { t:'{certNo}',           x:.784, y:.101, s:.024, w:400, c:'#222222', a:'left',   mx:.19 },
+    { t:'{name}',             x:.500, y:.426, s:.046, w:700, c:'#4b57b5', a:'center', mx:.66 },
+    { t:'{award}  {ptype}',   x:.500, y:.580, s:.037, w:600, c:'#3d4043', a:'center', mx:.80 }
+  ]}
+};
+const PVROW = { certNo:'สพป.อด.1-8324/2569', refCode:'BP-001', name:'นายพิชัย แก้วเมือง',
+  position:'ครู', school:'โรงเรียนบ้านโพนงามหนองตุ', schoolGroup:'กลุ่มเมือง 1',
+  ptype:'ประเภทผู้สร้างสื่อเทคโนโลยีดิจิทัล', title:'การจัดการเรียนรู้เชิงรุกด้วยสื่อดิจิทัล',
+  award:'รองชนะเลิศอันดับ 1 ระดับดีเยี่ยม', score:'92' };
+function layFill(tpl, row){
+  var any = false;
+  const s = String(tpl).replace(/\{(\w+)\}/g, function(m,k){
+    var v = String(row[k]==null?'':row[k]).trim(); if(v) any = true; return v;
+  });
+  if(!any) return '';
+  return s.replace(/(โรงเรียน|ผลงาน\s|เลขที่\s)\1/g,'$1').replace(/ {3,}/g,'  ').trim();
+}
+function layDraw(ctx,text,f,W,H){
+  if(!text) return;
+  const maxW=(f.mx||.8)*W, maxLines=f.ln||1;
+  var size=(f.s||.04)*H, lines=[];
+  ctx.textAlign=f.a||'center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=f.c||'#000';
+  for(var a=0;a<60;a++){
+    ctx.font=(f.w||400)+' '+Math.round(size)+'px Sarabun, sans-serif';
+    lines=[]; var cur='';
+    String(text).split(/(\s+)/).forEach(function(wd){
+      var t=cur+wd;
+      if(ctx.measureText(t).width>maxW && cur.trim()){ lines.push(cur.trim()); cur=wd.trim()?wd:''; }
+      else cur=t;
+    });
+    if(cur.trim()) lines.push(cur.trim());
+    if(lines.length<=maxLines || size<10) break;
+    size*=0.95;
+  }
+  if(lines.length>maxLines){ lines=lines.slice(0,maxLines); lines[maxLines-1]+='…'; }
+  const lh=size*1.30, y0=(f.y||.5)*H-(lines.length-1)*lh/2;
+  lines.forEach(function(ln,i){ ctx.fillText(ln,(f.x==null?.5:f.x)*W,y0+i*lh); });
+}
+async function layPreview(el, code){
+  const cv = el.querySelector('.lay-pv'), ta = el.querySelector('.f-lay');
+  var lay;
+  try{ lay = JSON.parse(ta.value.trim() || '{"fields":[]}'); }
+  catch(e){ return alert('รูปแบบ JSON ไม่ถูกต้อง: '+e.message); }
+  const img = el.querySelector('.tplimg');
+  if(!img || !img.src) return alert('กิจกรรมนี้ยังไม่มีไฟล์พื้นหลัง กรุณาอัปโหลดพื้นหลังก่อน');
+  if(!img.naturalWidth) await new Promise(function(ok){ img.onload = ok; });
+  if(document.fonts){
+    await Promise.all(['400','600','700','800'].map(function(w){ return document.fonts.load(w+' 100px Sarabun'); }));
+    await document.fonts.ready;
+  }
+  cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(img,0,0,cv.width,cv.height);
+  (lay.fields||[]).forEach(function(f){ layDraw(ctx, layFill(f.t, PVROW), f, cv.width, cv.height); });
+  cv.style.display = 'block';
 }
 
 /* ---------- ผูกปุ่มในแต่ละการ์ด ---------- */
@@ -429,7 +570,7 @@ function wire(){
         const r = await call({action:'actSave', token:TOKEN, code:a.code,
           name:q('.f-name').value.trim(), year:q('.f-year').value.trim(),
           openAt:q('.f-open').value ? new Date(q('.f-open').value).toISOString() : '',
-          status:q('.f-status').value, note:a.note||''});
+          status:q('.f-status').value, note:a.note||'', layout:q('.f-lay').value.trim()});
         if(r.ok){ await reload(); return; }
         alert(r.message||'บันทึกไม่สำเร็จ');
       }catch(e){ alert('เชื่อมต่อไม่สำเร็จ: '+e.message); }
@@ -456,6 +597,17 @@ function wire(){
         alert(r.message||'อัปโหลดไม่สำเร็จ');
       }catch(e){ alert('อัปโหลดไม่สำเร็จ: '+e.message); }
       this.disabled=false; this.textContent=o;
+    });
+
+    el.querySelectorAll('.pz').forEach(function(b){
+      b.addEventListener('click', function(){
+        q('.f-lay').value = JSON.stringify(PRESETS[this.dataset.p], null, 1);
+      });
+    });
+    q('.pv').addEventListener('click', function(){
+      const im = q('.tplimg');
+      if(im && !im.src){ loadTpl(im, a.code).then(function(){ layPreview(el, a.code); }); }
+      else layPreview(el, a.code);
     });
 
     q('.addr').addEventListener('click', function(){ sendRows(el, a, false, this); });
