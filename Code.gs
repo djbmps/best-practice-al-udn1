@@ -16,8 +16,25 @@ const SHEET_ID   = '1LsGET6p0PaxTvokyI7N4EpsB9_PYFFEV8iwW9EPUt1c';
 // 2) รหัสโฟลเดอร์ใน Google Drive สำหรับเก็บไฟล์ผลงาน
 const FOLDER_ID  = '1kIIgjAEI8gVfxyDzBEEA_iU62B5Fnh8z';
 
-// 3) รหัสผ่านสำหรับเข้าหน้าผู้ดูแลระบบ (admin.html)
-const ADMIN_PASS = 'udn1@bestal2569';
+// 3) รหัสผ่านสำหรับเข้าหน้าผู้ดูแลระบบ (admin.html / cert-admin.html)
+//
+//    ⚠️ ค่าด้านล่างนี้เป็น "รหัสสำรอง" เท่านั้น และมองเห็นได้จากภายนอกเพราะโค้ดอยู่บน GitHub
+//    วิธีตั้งรหัสจริงที่ปลอดภัย: ไปที่ Apps Script → ⚙ Project Settings → Script Properties
+//    → Add script property → Property = ADMIN_PASS , Value = รหัสผ่านที่ต้องการ → Save
+//    เมื่อตั้งค่าแล้ว ระบบจะใช้รหัสจาก Script Properties ทันที และรหัสสำรองด้านล่างจะใช้ไม่ได้อีก
+const ADMIN_PASS_FALLBACK = 'udn1@bestal2569';
+
+function adminPass() {
+  try {
+    var v = PropertiesService.getScriptProperties().getProperty('ADMIN_PASS');
+    if (v && String(v).trim()) return String(v).trim();
+  } catch (e) {}
+  return ADMIN_PASS_FALLBACK;
+}
+/* true = รหัสถูกต้อง */
+function isAdmin(token) {
+  return String(token == null ? '' : token) === adminPass();
+}
 
 /* ============================================================== */
 
@@ -71,11 +88,11 @@ function doPost(e) {
 
     /* ---- คำสั่งฝั่งผู้ดูแล (ส่งข้อมูลก้อนใหญ่ผ่าน POST) ---- */
     if (d.action === 'certAdd') {
-      if (d.token !== ADMIN_PASS) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+      if (!isAdmin(d.token)) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
       return json(addCerts(d.act, d.rows, d.replace === true));
     }
     if (d.action === 'tplUpload') {
-      if (d.token !== ADMIN_PASS) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
+      if (!isAdmin(d.token)) return json({ ok: false, message: 'รหัสผ่านไม่ถูกต้อง' });
       return json(saveTemplate(d.act, d.name, d.mime, d.data));
     }
 
@@ -182,7 +199,7 @@ function doGet(e) {
 
   var out;
   if (p.action === 'list') {
-    out = (p.token === ADMIN_PASS) ? { ok: true, rows: readAll().concat(readSep()) }
+    out = isAdmin(p.token) ? { ok: true, rows: readAll().concat(readSep()) }
                                    : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else if (p.action === 'public') {
     out = { ok: true, rows: readPublic() };
@@ -191,7 +208,7 @@ function doGet(e) {
   } else if (p.action === 'status') {
     out = { ok: true, open: isOpen(), closedMsg: CLOSED_MSG };
   } else if (p.action === 'setOpen') {
-    out = (p.token === ADMIN_PASS)
+    out = isAdmin(p.token)
       ? { ok: true, open: setOpen(String(p.open) === '1' || String(p.open) === 'true') }
       : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else if (p.action === 'certStatus') {
@@ -205,7 +222,7 @@ function doGet(e) {
 
   /* ---------- ผู้ดูแลระบบ ---------- */
   } else if (p.action === 'actList') {
-    if (p.token !== ADMIN_PASS) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
+    if (!isAdmin(p.token)) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
     else {
       out = { ok: true, acts: readActs().map(function (a) {
         return { code: a.code, name: a.name, year: a.year, openAt: a.openAt,
@@ -213,16 +230,16 @@ function doGet(e) {
                  n: certCount(a.code), live: actLive(a), note: a.note, layout: a.layout }; }) };
     }
   } else if (p.action === 'actSave') {
-    if (p.token !== ADMIN_PASS) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
+    if (!isAdmin(p.token)) { out = { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' }; }
     else { out = saveAct({ code: p.code, name: p.name, year: p.year, openAt: p.openAt,
                            status: p.status, note: p.note,
                            layout: (p.layout == null ? null : p.layout) }); }
   } else if (p.action === 'actDelete') {
-    out = (p.token === ADMIN_PASS) ? deleteAct(p.code) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+    out = isAdmin(p.token) ? deleteAct(p.code) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else if (p.action === 'certClear') {
-    out = (p.token === ADMIN_PASS) ? clearCerts(p.act) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+    out = isAdmin(p.token) ? clearCerts(p.act) : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
   } else if (p.action === 'migrateBP') {
-    out = (p.token === ADMIN_PASS) ? migrateBP2569() : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
+    out = isAdmin(p.token) ? migrateBP2569() : { ok: false, message: 'รหัสผ่านไม่ถูกต้อง' };
 
   } else {
     out = { ok: true, message: 'Best Practice 2569 API — สพป.อุดรธานี เขต 1', time: new Date().toISOString() };
